@@ -5,7 +5,7 @@
  * @format
  * @flow
  */
-
+/*
 import React, {Fragment} from 'react';
 import {Component} from 'react';
 import {
@@ -111,3 +111,34 @@ const styles = StyleSheet.create({
 });
 
 export default App;
+*/
+
+import React from "react";
+import { View, Text } from "react-native";
+import { createStackNavigator, createAppContainer } from "react-navigation";
+import GunluEkleEkrani from './src/screens/GunlukEkle.js';
+
+class App extends React.Component {
+  render() {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Text>Home Screen</Text>
+      </View>
+    );
+  }
+}
+
+const AppNavigator = createStackNavigator(
+  {
+  Home: {screen: App},
+  GunlukEkle: { screen: GunluEkleEkrani},
+  },
+
+  {
+    initialRouteName: 'GunlukEkle',
+    headerMode:'none'
+  }
+
+);
+
+export default createAppContainer(AppNavigator);

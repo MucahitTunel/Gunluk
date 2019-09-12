@@ -1,5 +1,7 @@
 import React, {Fragment} from 'react';
 import {Component} from 'react';
+//import { Tabs, Tab, Icon, Header } from 'react-native-elements';
+
 import {
   SafeAreaView,
   StyleSheet,
@@ -13,12 +15,11 @@ import {
   TextInput
 } from 'react-native';
 
-import { Container, Header, Left, Body, Right, Button, Icon, Title, Content, Item, Input, Form, Textarea} from 'native-base'
+import { Container, Header, Left, Body, Right, Button, Icon, Title, Content, Item, Input, Form, Textarea} from 'native-base';
 const window = Dimensions.get('window');
 
 
-  var SQLite = require('react-native-sqlite-storage');
-  var db = SQLite.openDatabase({name:'gunluk.db', createFromLocation:'~gunluk.db'});
+
 
 
 
@@ -27,10 +28,14 @@ const window = Dimensions.get('window');
     constructor(props){
     super(props)
 
+    var SQLite = require('react-native-sqlite-storage');
+    var db = SQLite.openDatabase({name:'gunluk.db', createFromLocation:'~gunluk.db'});
+
 
     this.state = {
       petname : "",
       baslik: "",
+      tarih:'',
     };
 
     this.handleChangeBaslik = this.handleChangeBaslik.bind(this);
@@ -50,6 +55,18 @@ const window = Dimensions.get('window');
         });
     });
   }
+
+  componentDidMount(){
+    var date = new Date().getDate();
+    var month = new Date().getMonth() + 1; //Current Month
+    var year = new Date().getFullYear(); //Current Year
+    this.setState({
+      tarih: date + '.' + month + '.' + year,
+    });
+  }
+
+
+
 
   handleChangeBaslik(a){
     this.setState({
@@ -91,6 +108,7 @@ const window = Dimensions.get('window');
               <Button transparent>
                 <Icon name='more' />
               </Button>
+
             </Right>
           </Header>
 
@@ -107,19 +125,22 @@ const window = Dimensions.get('window');
 
             }}
             >
+            <Text style={{marginTop:(window.height/10)-10,marginLeft:(window.width*3)/4, alignItems: 'center', justifyContent:'flex-end', fontSize:14}}>
+              Tarih: {this.state.tarih}
+            </Text>
 
             <TextInput
               placeholder="Başlık"
-              style={{marginTop:50, marginLeft:20, marginRight:20, backgroundColor:"gray", borderRadius:25,fontSize:16, color:'white'}}
+              style={{marginTop:20, marginLeft:20, marginRight:20, backgroundColor:"white", borderRadius:25,fontSize:12, color:'black', height:35}}
               onChangeText={this.handleChangeBaslik}
               />
 
             <Form>
               <Textarea
-                rowSpan={2}
+                rowSpan={10}
                 bordered
                 placeholder="Textarea"
-                style={{marginTop:20, marginLeft:20, marginRight:20,marginBottom:30, backgroundColor:"gray", fontSize:30}}
+                style={{marginTop:10, marginLeft:20, marginRight:20,marginBottom:30, backgroundColor:"white", fontSize:16, color:"black", borderRadius:25}}
                 onChangeText={this.handleChangeGunluk}/>
             </Form>
 

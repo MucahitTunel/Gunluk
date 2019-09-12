@@ -116,7 +116,18 @@ export default App;
 import React from "react";
 import { View, Text } from "react-native";
 import { createStackNavigator, createAppContainer } from "react-navigation";
-import GunluEkleEkrani from './src/screens/GunlukEkle.js';
+import GunlukEkleEkrani from './src/screens/GunlukEkle.js';
+import BaslangicEkrani from './src/screens/Baslangic.js';
+import AnasayfaEkrani from './src/screens/AnaSayfa.js';
+import DenemeEkrani from './src/screens/deneme.js';
+import ResimSecEkrani from './src/screens/resimsec.js';
+import ResimGosterEkrani from './src/screens/resimgoster.js';
+
+
+
+
+var SQLite = require('react-native-sqlite-storage');
+var db = SQLite.openDatabase({name:'gunluk.db', createFromLocation:'~gunluk.db'});
 
 class App extends React.Component {
   render() {
@@ -128,14 +139,37 @@ class App extends React.Component {
   }
 }
 
+
+
+
+db.transaction((tx) => {
+  tx.executeSql('SELECT * FROM baslangic WHERE deger=?',[1], (tx, results) => {
+      var len = results.rows.length;
+      console.log("Uzunluk: "+len);
+    });
+});
+
+db.close();
+
+
+
+
+
+
+
 const AppNavigator = createStackNavigator(
   {
   Home: {screen: App},
-  GunlukEkle: { screen: GunluEkleEkrani},
+  GunlukEkle: { screen: GunlukEkleEkrani},
+  Baslangic: {screen: BaslangicEkrani},
+  AnaSayfa: {screen: AnasayfaEkrani},
+  Deneme:{screen: DenemeEkrani},
+  ResimSec:{screen: ResimSecEkrani},
+  ResimGoster:{screen: ResimGosterEkrani},
   },
 
   {
-    initialRouteName: 'GunlukEkle',
+    initialRouteName: 'ResimGoster',
     headerMode:'none'
   }
 

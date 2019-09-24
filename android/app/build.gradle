@@ -188,6 +188,7 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-tts')
     implementation project(':react-native-image-picker')
     implementation project(':react-native-vector-icons')
     implementation project(':react-native-gesture-handler')
@@ -195,6 +196,9 @@ dependencies {
     implementation "com.facebook.react:react-native:+"  // From node_modules
     implementation project(':react-native-sqlite-storage')
     implementation project(':react-native-vector-icons')
+    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0-alpha02'
+
 
     if (enableHermes) {
       def hermesPath = "../../node_modules/hermesvm/android/";

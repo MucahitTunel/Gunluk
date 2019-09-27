@@ -1,4 +1,6 @@
 rootProject.name = 'gunluk'
+include ':react-native-android-text-to-speech'
+project(':react-native-android-text-to-speech').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-android-text-to-speech/android')
 
 include ':react-native-tts'
 project(':react-native-tts').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-tts/android')

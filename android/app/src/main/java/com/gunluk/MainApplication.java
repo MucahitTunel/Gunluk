@@ -7,6 +7,7 @@ import com.facebook.react.PackageList;
 import com.facebook.hermes.reactexecutor.HermesExecutorFactory;
 import com.facebook.react.bridge.JavaScriptExecutorFactory;
 import com.facebook.react.ReactApplication;
+import com.echo.reactandroidtts.RNAndroidTextToSpeechPackage;
 import net.no_mad.tts.TextToSpeechPackage;
 import com.imagepicker.ImagePickerPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
@@ -40,6 +41,7 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.<ReactPackage>asList(
         new SQLitePluginPackage(),   // register SQLite Plugin here
         new MainReactPackage(),
+            new RNAndroidTextToSpeechPackage(),
             new TextToSpeechPackage(),
             new ImagePickerPackage(),
             new VectorIconsPackage(),
@@ -53,6 +55,7 @@ public class MainApplication extends Application implements ReactApplication {
       return "index";
     }
   };
+
 
   @Override
   public ReactNativeHost getReactNativeHost() {

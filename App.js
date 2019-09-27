@@ -128,6 +128,7 @@ import GaleriEkrani from './src/screens/Galeri.js';
 import TabsEkrani from './src/screens/Tabs.js';
 import SayfaEkrani from './src/screens/Sayfa.js';
 import EmojiEkrani from './src/screens/EmojiListesi.js';
+import SpeechEkrani from './src/screens/TexttoSpeech.js';
 
 
 
@@ -159,10 +160,6 @@ db.close();
 
 
 
-
-
-
-
 const AppNavigator = createStackNavigator(
   {
   Home: {screen: App},
@@ -177,10 +174,11 @@ const AppNavigator = createStackNavigator(
   Tabs:{screen: TabsEkrani},
   Sayfa:{screen: SayfaEkrani},
   Emoji:{screen:EmojiEkrani},
+  Speech:{screen:SpeechEkrani}
   },
 
   {
-    initialRouteName: 'GunlukEkle',
+    initialRouteName: 'Tabs',
     headerMode:'none'
   }
 

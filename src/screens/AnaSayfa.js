@@ -29,7 +29,6 @@ class AnaSayfa extends Component <Props>{
   constructor(props){
     super(props);
 
-    AsyncStorage.setItem('kontrol', "0");
 
 
 
@@ -45,19 +44,22 @@ class AnaSayfa extends Component <Props>{
       uri: '',
       data: [],
       fotodata : [],
+      refreshing: false,
       emojiler : ['artist','deli','dusunceli','hasta','hayalkirikligi','kederli','kendinibegenmis','parti','sasirmis','sinirli','soguk','supheli','telasli','uykulu','uyusuk','zengin'],
       db,
       search: '',
     };
 
+    this.handleChangeSearch = this.handleChangeSearch.bind(this);
+
   }
 
 //----------------------------------------------------------------------------------------------------------
 
-    componentWillUnmount(){
+    componentDidUpdate(){
       const {db} = this.state;
 
-      db.close()
+
     }
 
 //----------------------------------------------------------------------------------------------------------
@@ -205,7 +207,7 @@ modElement(a){
 
 
                 <View style={{marginLeft:10}}>
-                <Text>{item.yazi}</Text>
+                <Text numberOfLines={4}>{item.yazi}</Text>
                 </View>
 
               </View>
@@ -241,9 +243,42 @@ modElement(a){
 
 //----------------------------------------------------------------------------------------------------------
 
-updateSearch = search => {
-    this.setState({ search });
-  };
+handleChangeSearch(a){
+
+  const {db} = this.state;
+
+
+
+  this.setState({
+    search : a,
+    refreshing: true,
+  });
+
+  console.log(this.state.search);
+
+
+  db.transaction((tx) => {
+    tx.executeSql("SELECT * FROM gunlugum WHERE baslik LIKE ? and yazi LIKE ?",['%'+this.state.search+'%','%'+this.state.search+'%'], (tx,results) =>{
+      console.log("sonuc :    "  +results);
+      var veriler = [];
+      var uzunluk = results.rows.length;
+
+      for(let i = 0 ; i < uzunluk ; i++){
+          veriler.push(results.rows.item(i))
+      }
+
+      this.setState({
+        data : veriler
+      })
+      console.log(this.state.data);
+
+    });
+
+  })
+}
+
+//----------------------------------------------------------------------------------------------------------
+
 
 //----------------------------------------------------------------------------------------------------------
   render() {
@@ -259,11 +294,11 @@ updateSearch = search => {
 
           <SearchBar
             placeholder="Ara"
-            onChangeText={this.updateSearch}
+            onChangeText={this.handleChangeSearch}
             style={{height:5}}
             value={search}
             containerStyle={{backgroundColor:'#eddada', height:40, alignItems:'center', justifyContent:'center'}}
-            inputStyle={{backgroundColor:'#d9d2d1'}}
+            inputStyle={{backgroundColor:'#d9d2d1', color:'black'}}
             inputContainerStyle={{backgroundColor:'#d9d2d1', height:30}}
 
           />

@@ -16,7 +16,8 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
-  Alert
+  Alert,
+  AsyncStorage
 } from 'react-native';
 
 
@@ -48,19 +49,13 @@ const window = Dimensions.get('window');
 
 */
 
-
-
-
-
-
-  class App extends Component<Props>{
+  class GunlukEkle extends Component<Props>{
 
     constructor(props){
     super(props)
 
     var SQLite = require('react-native-sqlite-storage');
     var db = SQLite.openDatabase({name:'gunluk.db', createFromLocation:'~gunluk.db'});
-
 
     this.state = {
 
@@ -72,9 +67,15 @@ const window = Dimensions.get('window');
       filePath: {},
       data : [],
       uri:'',
+      sira : 5,
       db,
+      durum: '',
 
     };
+
+    const {navigation} = this.props;
+
+    console.log("tekrardan");
 
     this.handleChangeBaslik = this.handleChangeBaslik.bind(this);
     this.handleChangeGunluk = this.handleChangeGunluk.bind(this);
@@ -229,6 +230,66 @@ const window = Dimensions.get('window');
   }
 
 
+  //------------------------------------------------------------------------------------------------------------
+  modElement(a){
+
+    const en = 60;
+    const boy = 60;
+
+    if (a === "artist") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/artist.png')}/>;
+    }else if (a === "deli") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/deli.png')}/>;
+    }else if (a === "dusunceli") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/dusunceli.png')}/>;
+    }else if (a === "hasta") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/hasta.png')}/>;
+    }else if (a === "hayalkirikligi") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/hayalkirikligi.png')}/>;
+    }else if (a === "kederli") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/kederli.png')}/>;
+    }else if (a === "kendinibegenmis") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/kendinibegenmis.png')}/>;
+    }else if (a === "mutlu") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/mutlu.png')}/>;
+    }else if (a === "parti") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/parti.png')}/>;
+    }else if (a === "sasirmis") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/sasirmis.png')}/>;
+    }else if (a === "sinirli") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/sinirli.png')}/>;
+    }else if (a === "sicak") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/sicak.png')}/>;
+    }else if (a === "soguk") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/soguk.png')}/>;
+    }else if (a === "supheli") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/supheli.png')}/>;
+    }else if (a === "telasli") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/telasli.png')}/>;
+    }else if (a === "uykulu") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/uykulu.png')}/>;
+    }else if (a === "uyusuk") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/uyusuk.png')}/>;
+    }else if (a === "zengin") {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/zengin.png')}/>;
+    }else {
+      return <Image style={{width:en, height:boy}} source={require('../emojis/deli.png')}/>;
+    }
+
+
+  }
+  //-----------------------------------------------------------------------------------------------------
+
+
+  refresh = (data) => {
+    this.setState({
+      durum: data
+    })
+    console.log("burdayım");
+    console.log("durum: " + this.state.durum);
+  }
+
+
 
 
   kaydet(){
@@ -299,15 +360,16 @@ const window = Dimensions.get('window');
 
                 <View style={{flexDirection:'row',flex:1, alignItems:'center', justifyContent:'center'}}>
 
+                <TouchableOpacity onPress={() => {this.props.navigation.navigate('Emoji',{onGoBack:this.refresh, });
 
+
+                }} >
                   <View style={{flex:2, alignItems:'flex-start', justifyContent:'center'}}>
 
-                    <Image
-                      style={{backgroundColor:'red', width:60, height:60, borderRadius:30}}
-                    />
+                    {this.modElement(this.state.durum)}
 
                   </View>
-
+                </TouchableOpacity>
 
                   <View style={{flex:3, alignItems:'flex-end'}}>
                     <Text style={{alignItems: 'center', justifyContent:'flex-end', fontSize:14}}>
@@ -399,4 +461,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default App;
+export default GunlukEkle;

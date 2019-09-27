@@ -11,7 +11,8 @@ import {
   Dimensions,
   TextInput,
   FlatList,
-  TouchableOpacity
+  TouchableOpacity,
+  AsyncStorage
 } from 'react-native';
 
 import {
@@ -35,12 +36,14 @@ import {
   ListItem
 } from 'native-base';
 
+import { withNavigation } from 'react-navigation';
 
 
 
 
 
-class Sayfa extends Component <Props>{
+
+class EmojiListesi extends Component <Props>{
 
 
   constructor(props){
@@ -48,16 +51,34 @@ class Sayfa extends Component <Props>{
 
     const {navigation} = this.props;
 
+    /*const baslik = navigation.getParam("baslik");
+    const yazi = navigation.getParam("yazi");
+    const tarih = navigation.getParam("tarih");
+    const uri = navigation.getParam("uri");
+    const veri = navigation.getParam("data");
+    const durum = navigation.getParam("durum");
+    const sira = navigation.getParam("sira");
+
+
+    console.log(baslik);
+    console.log(yazi);
+    console.log(tarih);
+    console.log(uri);
+    console.log(veri);
+    console.log(durum);
+    console.log(sira);*/
 
 
 
     this.state = {
 
 
-        data : ['artist','deli','dusunceli','hasta','hayalkirikligi','kederli','kendinibegenmis','parti','sasirmis','sinirli','soguk','supheli','telasli','uykulu','uyusuk','zengin'],
+        data : ['artist','deli','dusunceli','hasta','hayalkirikligi','kederli','kendinibegenmis','mutlu','parti','sasirmis','sinirli','sicak','soguk','supheli','telasli','uykulu','uyusuk','zengin'],
         checked:0,
 
     };
+
+    console.log("checked:  " + this.state.checked);
 
   }
 
@@ -199,12 +220,9 @@ modElement(a){
       )
     }
 
+//-----------------------------------------------------------------------------------------------------------
+//style={{margin:10,borderStyle:'solid', borderBottomColor:'black',borderBottomWidth: 2, justifyContent:'center'}}
 //----------------------------------------------------------------------------------------------------------
-
-
-
-
-
 
 
   render() {
@@ -233,24 +251,27 @@ modElement(a){
 
         <Content style={{flex:1, backgroundColor:'#eddada'}}>
 
-            {this.state.data.map((data, key) =>{
-
+            {this.state.data.map((deger, key) =>{
+              console.log(key);
               return(
-                <View style={{margin:10,borderStyle:'solid', borderBottomColor:'black',borderBottomWidth: 2, justifyContent:'center'}}>
+                <React.Fragment key={key} >
+                <View style={{margin:10,borderStyle:'solid', borderBottomColor:'black',borderBottomWidth: 2, justifyContent:'center'}} >
+                  <TouchableOpacity onPress={() => {this.props.navigation.state.params.onGoBack(deger);
+                    this.props.navigation.goBack();}}>
 
                   {this.state.checked == key ?
                     <View style={{justifyContent:'center', marginBottom:5}}>
-                      <TouchableOpacity>
+
                         <View style={{flexDirection:'row'}}>
                             <View style={{alignItems:'flex-start', justifyContent:'center', flex:1}}>
-                              {this.modElement(data)}
+                              {this.modElement(deger)}
                             </View>
 
 
                             <View style={{flex:3,flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
 
                               <View style={{flex:2}}>
-                                <Text>{data}</Text>
+                                <Text>{deger}</Text>
                               </View>
 
                               <View style={{flex:1,alignItems:'center', justifyContent:'center'}}>
@@ -259,39 +280,41 @@ modElement(a){
 
                             </View>
                         </View>
-                      </TouchableOpacity>
-                      </View>
+
+                    </View>
 
                     :
 
                     <View style={{justifyContent:'center', marginBottom:5}}>
-                    <TouchableOpacity onPress={() => this.setState({checked:key})}>
 
-                      <View style={{flexDirection:'row'}}>
 
-                          <View style={{alignItems:'flex-start', justifyContent:'center', flex:1}}>
-                            {this.modElement(data)}
-                          </View>
+                        <View style={{flexDirection:'row'}}>
 
-                          <View style={{flex:3, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
-
-                            <View style={{flex:2}}>
-                              <Text>{data}</Text>
+                            <View style={{alignItems:'flex-start', justifyContent:'center', flex:1}}>
+                              {this.modElement(deger)}
                             </View>
 
-                            <View style={{flex:1,alignItems:'center', justifyContent:'center'}}>
-                              <Image style={{width:20, height:20, borderRadius:20}} source={require('../radiobuton/dolu.png')}/>
+                            <View style={{flex:3, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
+
+                              <View style={{flex:2}}>
+                                <Text>{deger}</Text>
+                              </View>
+
+                              <View style={{flex:1,alignItems:'center', justifyContent:'center'}}>
+                                <Image style={{width:20, height:20, borderRadius:20}} source={require('../radiobuton/dolu.png')}/>
+                              </View>
+
                             </View>
 
-                          </View>
+                        </View>
 
-                      </View>
 
-                    </TouchableOpacity>
                     </View>
                   }
 
+                  </TouchableOpacity>
                   </View>
+                  </React.Fragment>
               )}
 
             )}
@@ -329,4 +352,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Sayfa;
+export default EmojiListesi;

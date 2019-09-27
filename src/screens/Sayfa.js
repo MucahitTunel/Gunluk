@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 
 import { Container, Header,Button, Left, Body, Right, Icon, Title, Content, Item, Input, Form, Textarea, Tab, Tabs, TabHeading} from 'native-base';
-
+import AndroidTextToSpeech from 'react-native-tts';
 
 
 
@@ -137,6 +137,25 @@ modElement(a){
   }
 }
 
+
+
+
+//--------------------------------------------------------------------------------------------------------
+componentDidUpdate(){
+  AndroidTextToSpeech.stop();
+}
+
+
+
+//--------------------------------------------------------------------------------------------------------
+oku(){
+  AndroidTextToSpeech.setDefaultPitch(1.6);
+  AndroidTextToSpeech.setDefaultRate(0.7);
+  AndroidTextToSpeech.setDucking(true);
+  AndroidTextToSpeech.setDefaultLanguage('tr-TR');
+  AndroidTextToSpeech.speak(this.state.yazi, 'ADD');
+}
+
 //----------------------------------------------------------------------------------------------------------
   render() {
 
@@ -158,6 +177,18 @@ modElement(a){
           <Body>
             <Title>Header</Title>
           </Body>
+
+          <Right>
+
+            <TouchableOpacity onPress={this.oku.bind(this)}>
+              <Icon style={{color:'white',marginRight:20, fontSize:30}} name='md-headset' />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={'Sayfa',{durum: this.state.durum, baslik: this.state.baslik, yazi:this.state.yazi, tarih: this.state.tarih, uri: this.state.uri, data:this.state.data}}>
+              <Icon style={{color:'white', fontSize:30}} name='md-create' />
+            </TouchableOpacity>
+
+          </Right>
 
         </Header>
 

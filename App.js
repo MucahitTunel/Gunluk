@@ -129,6 +129,7 @@ import TabsEkrani from './src/screens/Tabs.js';
 import SayfaEkrani from './src/screens/Sayfa.js';
 import EmojiEkrani from './src/screens/EmojiListesi.js';
 import SpeechEkrani from './src/screens/TexttoSpeech.js';
+import DuzenleEkrani from '.src/screens/Duzenle.js';
 
 
 
@@ -160,6 +161,10 @@ db.close();
 
 
 
+
+
+
+
 const AppNavigator = createStackNavigator(
   {
   Home: {screen: App},
@@ -174,7 +179,8 @@ const AppNavigator = createStackNavigator(
   Tabs:{screen: TabsEkrani},
   Sayfa:{screen: SayfaEkrani},
   Emoji:{screen:EmojiEkrani},
-  Speech:{screen:SpeechEkrani}
+  Speech:{screen:SpeechEkrani},
+  Duzenle:{screen:DuzenleEkrani},
   },
 
   {

@@ -180,7 +180,7 @@ modElement(a){
             <TouchableOpacity
 
             style={{height:250, margin:20, flex:1, backgroundColor:'white', borderRadius:30}}
-            onPress = {() => this.props.navigation.navigate('Sayfa', {tarih:item.tarih, baslik:item.baslik, yazi:item.yazi, durum:item.durum, uri: item.uri, data: this.state.data})}
+            onPress = {() => this.props.navigation.navigate('Sayfa', {tarih:item.tarih, baslik:item.baslik, yazi:item.yazi, durum:item.durum, uri: item.uri, data: this.state.data, id:item.id})}
 
             >
 

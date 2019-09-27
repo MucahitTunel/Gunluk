@@ -34,6 +34,7 @@ class Sayfa extends Component <Props>{
     const durum = navigation.getParam('durum');
     const uri = navigation.getParam('uri');
     const data = navigation.getParam('data');
+    const id = navigation.getParam('id');
 
 
 
@@ -64,6 +65,7 @@ class Sayfa extends Component <Props>{
         tarih: tarih,
         uri: uri,
         data:arr,
+        id:id,
 
     };
 
@@ -184,7 +186,7 @@ oku(){
               <Icon style={{color:'white',marginRight:20, fontSize:30}} name='md-headset' />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={'Sayfa',{durum: this.state.durum, baslik: this.state.baslik, yazi:this.state.yazi, tarih: this.state.tarih, uri: this.state.uri, data:this.state.data}}>
+            <TouchableOpacity onPress={'Duzenle',{durum: this.state.durum, baslik: this.state.baslik, yazi:this.state.yazi, tarih: this.state.tarih, uri: this.state.uri, data:this.state.data, id: this.state.id}}>
               <Icon style={{color:'white', fontSize:30}} name='md-create' />
             </TouchableOpacity>
 

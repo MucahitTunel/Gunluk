@@ -36,6 +36,8 @@ target 'gunluk' do
 
   pod 'TextToSpeech', :path => '../node_modules/react-native-tts'
 
+  pod 'RCTRestart', :path => '../node_modules/react-native-restart'
+
   target 'gunlukTests' do
     inherit! :search_paths
     # Pods for testing

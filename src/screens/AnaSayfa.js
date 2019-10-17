@@ -48,6 +48,7 @@ class AnaSayfa extends Component <Props>{
       emojiler : ['artist','deli','dusunceli','hasta','hayalkirikligi','kederli','kendinibegenmis','parti','sasirmis','sinirli','soguk','supheli','telasli','uykulu','uyusuk','zengin'],
       db,
       search: '',
+      a : 0,
     };
 
     this.handleChangeSearch = this.handleChangeSearch.bind(this);
@@ -63,28 +64,36 @@ class AnaSayfa extends Component <Props>{
     }
 
 //----------------------------------------------------------------------------------------------------------
-    componentDidMount(){
 
-      const {db} = this.state;
+veritabani(){
+  const {db} = this.state;
 
-      db.transaction((tx) => {
-        tx.executeSql('SELECT * FROM gunlugum',[], (tx,results) =>{
-          var degerler = [];
-          var uzunluk = results.rows.length;
+  db.transaction((tx) => {
+    tx.executeSql('SELECT * FROM gunlugum',[], (tx,results) =>{
+      var degerler = [];
+      var uzunluk = results.rows.length;
 
-          for(let i = 0 ; i < uzunluk ; i++){
-              degerler.push(results.rows.item(i))
-          }
+      for(let i = 0 ; i < uzunluk ; i++){
+          degerler.push(results.rows.item(i))
+      }
 
-          this.setState({
-            data : degerler
-          })
-          console.log(this.state.data);
+      this.setState({
+        data : degerler
+      })
+      console.log(this.state.data);
 
-        });
+    });
 
-    })
-  }
+  })
+}
+
+
+//----------------------------------------------------------------------------------------------------------
+
+componentDidMount(){
+
+  this.veritabani();
+}
 
 //----------------------------------------------------------------------------------------------------------
 
@@ -92,7 +101,7 @@ class AnaSayfa extends Component <Props>{
 
     return (
 
-      <View style={{margin:10}}>
+      <View style={{margin:7}}>
 
         <Image
         style={{width:50, height:50, borderRadius:25}}
@@ -149,28 +158,66 @@ modElement(a){
   }
 }
 
+//----------------------------------------------------------------------------------------------------------
+
+refresh = () => {
+
+  this.veritabani();
+}
+
 
 
 //----------------------------------------------------------------------------------------------------------
 
   renderItem = ({ item }) => {
-    console.log("item data =======>"+item.uri);
 
     var degerler = item.uri;
+    console.log("anasayfa item data =======>"+degerler);
 
-    sonuc = degerler.split(',');
+
+//1 tane değer varsa
     var arr = [];
+    var kontrol = 1;
 
-    for(let i = 0 ; i < sonuc.length; i++){
+    if(degerler === null){
+      degerler = "";
+      console.log("nullllllllllllllllllll");
+      deger = this.state.a;
 
-        arr.push({
-          uri: sonuc[i]
-        });
+    }else {
+      if(degerler !== ""){
+        if(kontrol === 1){
+          sonuc = degerler.split(',');
+
+
+          for(let i = 0 ; i < sonuc.length; i++){
+
+              deger = this.state.a;
+
+
+              arr.push({
+                uri: sonuc[i],
+                id : deger,
+              });
+
+              deger = this.state.a + 1;
+          }
+
+        }//if
+        else {
+          deger = this.state.a;
+          arr.push({
+            uri: degerler,
+            id : deger,
+          });
+
+        }//else
+      }else {
+        deger = this.state.a;
+
+      }
+
     }
-
-    this.setState({
-      fotodata: arr
-    })
 
 
     return (
@@ -180,7 +227,7 @@ modElement(a){
             <TouchableOpacity
 
             style={{height:250, margin:20, flex:1, backgroundColor:'white', borderRadius:30}}
-            onPress = {() => this.props.navigation.navigate('Sayfa', {tarih:item.tarih, baslik:item.baslik, yazi:item.yazi, durum:item.durum, uri: item.uri, data: this.state.data, id:item.id})}
+            onPress = {() => this.props.navigation.navigate('Sayfa', {tarih:item.tarih, baslik:item.baslik, yazi:item.yazi, durum:item.durum, uri: item.uri, data: this.state.data, id:item.id, onGoBack:this.refresh})}
 
             >
 
@@ -216,16 +263,23 @@ modElement(a){
 
             <SafeAreaView  style={{margin:10, flex:1, justifyContent:'center'}}>
 
+              { degerler !== ""  ?
+
               <FlatList
                 data={arr}
                 renderItem={this.renderFoto}
-                numColumns= {3}
+                numColumns= {5}
                 refreshing={this.state.refreshing}
-                extraData={this.state.fotodata}
-                keyExtractor={item=>item.uri}
+                extraData={arr}
+                keyExtractor={item=>item.id.toString()}
               >
 
               </FlatList>
+
+              :
+
+              null
+            }
 
             </SafeAreaView>
 
@@ -315,7 +369,7 @@ handleChangeSearch(a){
               renderItem={this.renderItem}
               refreshing={this.state.refreshing}
               extraData={this.state.data}
-              keyExtractor={item=>item.uri}
+              keyExtractor={item=>item.id.toString()}
             >
 
             </FlatList>

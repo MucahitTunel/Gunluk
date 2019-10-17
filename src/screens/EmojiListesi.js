@@ -51,6 +51,8 @@ class EmojiListesi extends Component <Props>{
 
     const {navigation} = this.props;
 
+    const sira = navigation.getParam("sira");
+
     /*const baslik = navigation.getParam("baslik");
     const yazi = navigation.getParam("yazi");
     const tarih = navigation.getParam("tarih");
@@ -74,7 +76,7 @@ class EmojiListesi extends Component <Props>{
 
 
         data : ['artist','deli','dusunceli','hasta','hayalkirikligi','kederli','kendinibegenmis','mutlu','parti','sasirmis','sinirli','sicak','soguk','supheli','telasli','uykulu','uyusuk','zengin'],
-        checked:0,
+        checked:sira,
 
     };
 

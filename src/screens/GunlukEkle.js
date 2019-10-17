@@ -17,7 +17,9 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
-  AsyncStorage
+  AsyncStorage,
+  ToastAndroid,
+  BackHandler
 } from 'react-native';
 
 
@@ -67,7 +69,7 @@ const window = Dimensions.get('window');
       filePath: {},
       data : [],
       uri:'',
-      sira : 5,
+      sira : 0,
       db,
       durum: '',
 
@@ -155,6 +157,8 @@ const window = Dimensions.get('window');
 
 
   componentDidMount(){
+
+    this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
     var date = new Date().getDate();
     var month = new Date().getMonth() + 1; //Current Month
     var year = new Date().getFullYear(); //Current Year
@@ -163,6 +167,12 @@ const window = Dimensions.get('window');
     });
 
 
+  }
+
+  handleBackPress = () => {
+      this.props.navigation.state.params.onGoBack();
+      this.props.navigation.goBack(); // works best when the goBack is async
+      return true;
   }
 
 
@@ -299,7 +309,9 @@ const window = Dimensions.get('window');
     db.transaction((tx) => {
       tx.executeSql('INSERT INTO gunlugum(baslik, yazi, tarih, durum,uri) VALUES(?,?,?,?,?)',[this.state.baslik, this.state.gunluk, this.state.tarih, "mutlu", this.state.uri], (tx, results) => {
           if(results.rowsAffected > 0){
-            Alert.alert("Kaydedildi")
+            ToastAndroid.show('Kaydedildi', ToastAndroid.SHORT);
+            this.props.navigation.state.params.onGoBack();
+            this.props.navigation.goBack();
           }
         });
     });
@@ -360,7 +372,7 @@ const window = Dimensions.get('window');
 
                 <View style={{flexDirection:'row',flex:1, alignItems:'center', justifyContent:'center'}}>
 
-                <TouchableOpacity onPress={() => {this.props.navigation.navigate('Emoji',{onGoBack:this.refresh, });
+                <TouchableOpacity onPress={() => {this.props.navigation.navigate('Emoji',{onGoBack:this.refresh,sira:this.state.sira });
 
 
                 }} >

@@ -17,7 +17,8 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
-  AsyncStorage
+  AsyncStorage,
+  BackHandler
 } from 'react-native';
 
 
@@ -49,7 +50,7 @@ const window = Dimensions.get('window');
 
 */
 
-  class Duzenle extends Component<Props>{
+  class GunlukEkle extends Component<Props>{
 
     constructor(props){
     super(props)
@@ -57,14 +58,50 @@ const window = Dimensions.get('window');
     var SQLite = require('react-native-sqlite-storage');
     var db = SQLite.openDatabase({name:'gunluk.db', createFromLocation:'~gunluk.db'});
 
+
     const {navigation} = this.props;
-    const baslik = navigation.getParam('baslik');
-    const yazi = navigation.getParam('yazi');
-    const tarih = navigation.getParam('tarih');
-    const durum = navigation.getParam('durum');
-    const uri = navigation.getParam('uri');
-    const data = navigation.getParam('data');
-    const id = navigation.getParam('id');
+
+    const baslik = navigation.getParam("baslik");
+    const tarih = navigation.getParam("tarih");
+    const data = navigation.getParam("data");
+    const durum = navigation.getParam("durum");
+    const yazi = navigation.getParam("yazi");
+    const uri = navigation.getParam("uri");
+    const id = navigation.getParam("id");
+    const sira = navigation.getParam("sira");
+
+
+
+    console.log("sıra eğeri: " + sira);
+    console.log("sıra eğeri: " + durum);
+    console.log("id: "   + id);
+    console.log(uri);
+    console.log(baslik);
+
+
+    var dizi=[];
+
+    if(uri !== "" && uri !== null){
+      if (uri.includes(",")) {
+        sonuc = uri.split(',');
+        for(let i = 0 ; i < sonuc.length; i++){
+
+            dizi.push({
+              uri: sonuc[i],
+              id : i,
+            });
+
+        }
+      }else {
+        dizi.push({
+          uri: uri,
+          id : 1,
+        });
+      }
+
+    }
+
+
 
 
 
@@ -75,13 +112,20 @@ const window = Dimensions.get('window');
       gunluk:yazi,
       selected: false,
       refreshing: false,
-      filePath: {},
       data : data,
       uri:uri,
+      sira: sira,
       db,
       durum: durum,
-
+      id:id,
+      navigation:navigation,
+      uriler:dizi,
     };
+
+    console.log(tarih);
+
+
+
 
 
 
@@ -119,24 +163,44 @@ const window = Dimensions.get('window');
         let source = response;
         // You can also display the image using data:
         // let source = { uri: 'data:image/jpeg;base64,' + response.data };
-        let cevap = this.state.data.concat(response)
-        this.setState({
-          filePath: source,
-          data: cevap,
-        });
+        //let cevap = this.state.data.concat(response)
+
 
         let path = "";
-        let sonpath = "";
 
 
-        if(this.state.uri === ""){
-          path = this.state.filePath.uri;
-          sonpath = this.state.uri.concat(path);
+
+        if(this.state.uri === "" || this.state.uri === null ){
+          path = source.uri;
+
         }
         else {
-          path = ","+this.state.filePath.uri;
-          sonpath = this.state.uri.concat(path);
+          path = this.state.uri + "," + source.uri;
+
         }
+
+
+
+        var arr = [];
+
+        if(path.includes(",")) {
+
+              sonuc = path.split(',');
+              for(let i = 0 ; i < sonuc.length; i++){
+
+                  arr.push({
+                    uri: sonuc[i],
+                    id : i,
+                  });
+
+              }
+
+          }else {
+            arr.push({
+              uri:path,
+              id:1,
+            })
+          }
 
 
 
@@ -148,48 +212,69 @@ const window = Dimensions.get('window');
 
         this.setState({
           selected: true,
-          uri : sonpath,
+          uri : path,
+          uriler: arr,
         })
-        console.log("SonPath:   " + this.state.uri);
-        console.log("Data:  " + this.state.data);
+        console.log("Path:   " + this.state.uri);
+
 
       }
     });
   };
 
+
+
   deleteItem = uri =>{
-    const filteredData = this.state.data.filter(item => item.uri !== uri);
+
+
+    //  Kontrol atılmalı
+    //  Veri silindiğinde boş olması gerekli
+    //  null olmamasına dikkat edilecek
+
+
+
+    console.log('silinecek:===============>' + uri);
+    const filteredData = this.state.uriler.filter(item => item.uri !== uri);
     var deger = this.state.uri;
     console.log("deger: "+ deger);
     sonuc = deger.split(',');
     console.log("sonuç:  " + sonuc);
 
-    let sonDeger = '';
-    var uzunluk = sonuc.length
-    console.log("uzunluk:   " + uzunluk);
-    console.log("uri:  " + uri);
+    if(sonuc.length > 1){
+      let sonDeger = '';
+      var uzunluk = sonuc.length
+      console.log("uzunluk:   " + uzunluk);
+      console.log("uri:  " + uri);
 
-    for(var i=0;i<uzunluk;i++){
-      if(sonuc[i] !== uri){
-        console.log("sonucdegerleri: " + sonuc[i]);
-        if(sonDeger===""){
-          sonDeger = sonDeger + sonuc[i]
-        }else {
-          sonDeger = sonDeger + "," + sonuc[i];
+      for(var i=0;i<uzunluk;i++){
+        if(sonuc[i] !== uri){
+          console.log("sonucdegerleri: " + sonuc[i]);
+          if(sonDeger===""){
+            sonDeger = sonDeger + sonuc[i]
+          }else {
+            sonDeger = sonDeger + "," + sonuc[i];
+          }
         }
       }
+
+      console.log("sondeger: " + sonDeger);
+      var urison = sonDeger;
+      console.log("urison:    " + urison);
+
+      this.setState({
+        uriler: filteredData,
+        uri : urison,
+       });
+
+       console.log("uri son hali :    " + this.state.uri);
+    }else {
+      this.setState({
+        uriler: filteredData,
+        uri : urison,
+       });
     }
 
-    console.log("sondeger: " + sonDeger);
-    var urison = sonDeger;
-    console.log("urison:    " + urison);
 
-    this.setState({
-      data: filteredData,
-      uri : urison,
-     });
-
-     console.log("uri son hali :    " + this.state.uri);
   }
 
 
@@ -199,7 +284,7 @@ const window = Dimensions.get('window');
 
     return (
 
-        <View style={{width:100, height:130, margin:20, backgroundColor:'red'}}>
+        <View style={{width:100, height:130, margin:10, backgroundColor:'red'}}>
           <Image
           style={{width:100, height:100}}
           source={{uri:item.uri}}>
@@ -267,7 +352,23 @@ const window = Dimensions.get('window');
 
 
   }
-  //-----------------------------------------------------------------------------------------------------
+
+
+//----------------------------------------------------------------------------------------------------
+componentDidMount() {
+this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
+}
+
+componentWillUnmount() {
+    this.backHandler.remove()
+  }
+
+handleBackPress = () => {
+    this.props.navigation.goBack(); // works best when the goBack is async
+    return true;
+}
+
+//-----------------------------------------------------------------------------------------------------
 
 
   refresh = (data) => {
@@ -279,19 +380,37 @@ const window = Dimensions.get('window');
   }
 
 
-
+//------------------------------------------------------------------------------------------------------------
 
   kaydet(){
 
     const {db} = this.state;
+    const {navigation} = this.state;
     console.log("kaydet");
+
+    console.log(this.state.baslik);
+    console.log(this.state.gunluk);
+    console.log(this.state.uri);
+    console.log(this.state.durum);
+    console.log(this.state.id);
+
+
+
     db.transaction((tx) => {
-      tx.executeSql('INSERT INTO gunlugum(baslik, yazi, tarih, durum,uri) VALUES(?,?,?,?,?)',[this.state.baslik, this.state.gunluk, this.state.tarih, "mutlu", this.state.uri], (tx, results) => {
+      tx.executeSql('UPDATE gunlugum SET baslik = ? , yazi = ? , uri = ? , durum = ? WHERE id = ?' ,[this.state.baslik, this.state.gunluk, this.state.uri, this.state.durum, this.state.id], (tx, results) => {
+        console.log(results.rowsAffected);
           if(results.rowsAffected > 0){
-            Alert.alert("Kaydedildi")
+            navigation.state.params.onGoBack(this.state.id);
+            navigation.goBack();
+          }else {
+            Alert.alert("Hata")
           }
         });
     });
+
+
+
+
   }
 
 
@@ -349,7 +468,7 @@ const window = Dimensions.get('window');
 
                 <View style={{flexDirection:'row',flex:1, alignItems:'center', justifyContent:'center'}}>
 
-                <TouchableOpacity onPress={() => {this.props.navigation.navigate('Emoji',{onGoBack:this.refresh, });
+                <TouchableOpacity onPress={() => {this.props.navigation.navigate('Emoji',{onGoBack:this.refresh,  sira: this.state.sira });
 
 
                 }} >
@@ -375,30 +494,41 @@ const window = Dimensions.get('window');
                       placeholder="Başlık"
                       style={{marginTop:20, marginLeft:20, marginRight:20, backgroundColor:"white", borderRadius:25,fontSize:12, color:'black', height:35}}
                       onChangeText={this.handleChangeBaslik}
+                      value={this.state.baslik}
                       />
 
-                    <Form>
-                      <Textarea
-                        rowSpan={10}
-                        bordered
+
+
+                    <TextInput
+                        multiline = {true}
                         placeholder="Yazınız..."
                         style={{marginTop:10, marginLeft:20, marginRight:20,marginBottom:30, backgroundColor:"white", fontSize:16, color:"black", borderRadius:25}}
-                        onChangeText={this.handleChangeGunluk}/>
-                    </Form>
+                        numberOfLines = {10}
+                        value={this.state.gunluk}
+                        onChangeText={this.handleChangeGunluk}
+                    />
+
 
                     <SafeAreaView  style={{margin:10}}>
 
+                    { this.state.uri !== null && this.state.uri !== "" ?
+
                       <FlatList
-                        data={this.state.data}
+                        data={this.state.uriler}
                         renderItem={this.renderItem}
                         numColumns={3}
                         refreshing={this.state.refreshing}
-                        extraData={this.state.data}
+                        extraData={this.state.uriler}
                         keyExtractor={item=>item.uri}
                       >
 
                       </FlatList>
 
+                      :
+
+                      null
+
+                      }
                     </SafeAreaView>
 
                     <TouchableOpacity
@@ -434,7 +564,6 @@ const window = Dimensions.get('window');
 
 
 
-
   );
   }
 };
@@ -450,4 +579,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default Duzenle;
+export default GunlukEkle;

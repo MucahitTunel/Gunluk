@@ -11,12 +11,13 @@ import {
   Dimensions,
   TextInput,
   FlatList,
-  TouchableOpacity
+  TouchableOpacity,
+  BackHandler,
 } from 'react-native';
 
 import { Container, Header,Button, Left, Body, Right, Icon, Title, Content, Item, Input, Form, Textarea, Tab, Tabs, TabHeading} from 'native-base';
 import AndroidTextToSpeech from 'react-native-tts';
-
+import { withNavigation } from 'react-navigation';
 
 
 
@@ -27,14 +28,27 @@ class Sayfa extends Component <Props>{
   constructor(props){
     super(props);
 
+    var SQLite = require('react-native-sqlite-storage');
+    var db = SQLite.openDatabase({name:'gunluk.db', createFromLocation:'~gunluk.db'});
+
     const {navigation} = this.props;
     const baslik = navigation.getParam('baslik');
     const yazi = navigation.getParam('yazi');
     const tarih = navigation.getParam('tarih');
     const durum = navigation.getParam('durum');
-    const uri = navigation.getParam('uri');
+    var uri = navigation.getParam('uri');
     const data = navigation.getParam('data');
     const id = navigation.getParam('id');
+
+    console.log("id====>" + id);
+
+    var modlar = ['artist','deli','dusunceli','hasta','hayalkirikligi','kederli','kendinibegenmis','mutlu','parti','sasirmis','sinirli','sicak','soguk','supheli','telasli','uykulu','uyusuk','zengin'];
+
+    for(let i = 0; i < modlar.length; i++){
+      if(modlar[i] === durum){
+        var sira = i;
+      }
+    }
 
 
 
@@ -46,16 +60,29 @@ class Sayfa extends Component <Props>{
     console.log(data);
 
     var degerler = uri;
-
-    sonuc = degerler.split(',');
     var arr = [];
+    if(degerler !== null && degerler !== ""){
+      if(degerler.includes(",")){
+        sonuc = degerler.split(',');
 
-    for(let i = 0 ; i < sonuc.length; i++){
 
+        for(let i = 0 ; i < sonuc.length; i++){
+
+            arr.push({
+              uri: sonuc[i],
+              id:i,
+            });
+        }
+      }else {
         arr.push({
-          uri: sonuc[i]
+          uri: degerler,
+          id:1,
         });
+      }
+
     }
+
+
 
     this.state = {
 
@@ -66,6 +93,10 @@ class Sayfa extends Component <Props>{
         uri: uri,
         data:arr,
         id:id,
+        sira:sira,
+        refresh : false,
+        db,
+
 
     };
 
@@ -75,6 +106,8 @@ class Sayfa extends Component <Props>{
 //----------------------------------------------------------------------------------------------------------
 
     renderFoto = ({ item }) => {
+
+      console.log("Tekrar");
 
       return (
 
@@ -90,7 +123,19 @@ class Sayfa extends Component <Props>{
     }
 
 //----------------------------------------------------------------------------------------------------------
+componentDidMount() {
+this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
+}
 
+componentWillUnmount() {
+    this.backHandler.remove()
+  }
+
+handleBackPress = () => {
+    this.props.navigation.state.params.onGoBack();
+    this.props.navigation.goBack(); // works best when the goBack is async
+    return true;
+}
 //----------------------------------------------------------------------------------------------------------
 
 modElement(a){
@@ -141,10 +186,64 @@ modElement(a){
 
 
 
-
 //--------------------------------------------------------------------------------------------------------
 componentDidUpdate(){
   AndroidTextToSpeech.stop();
+}
+
+
+refresh = (id) => {
+
+  const {db} = this.state;
+
+  db.transaction((tx) => {
+    tx.executeSql('SELECT * FROM gunlugum WHERE id = ?',[id], (tx,results) =>{
+
+      var uzunluk = results.rows.length;
+
+      var baslik = results.rows.item(0).baslik;
+      var yazi = results.rows.item(0).yazi;
+      var durum = results.rows.item(0).durum;
+      var tarih = results.rows.item(0).tarih;
+      var uri = results.rows.item(0).uri;
+
+      var degerler = [];
+      if(uri !== null && uri !== ""){
+        if(uri.includes(",")){
+          sonuc = uri.split(',');
+
+
+          for(let i = 0 ; i < sonuc.length; i++){
+
+              degerler.push({
+                uri: sonuc[i],
+                id:i,
+              });
+          }
+        }else {
+          degerler.push({
+            uri: uri,
+            id:1,
+          });
+        }
+
+      }
+
+      this.setState({
+        baslik : baslik,
+        yazi : yazi,
+        durum:durum,
+        tarih:tarih,
+        uri:uri,
+        refresh: true,
+        data:degerler,
+      })
+    });
+
+})
+
+
+
 }
 
 
@@ -157,6 +256,24 @@ oku(){
   AndroidTextToSpeech.setDefaultLanguage('tr-TR');
   AndroidTextToSpeech.speak(this.state.yazi, 'ADD');
 }
+
+//--------------------------------------------------------------------------------------------------------
+sil(){
+  const {db} = this.state;
+
+  db.transaction((tx) => {
+    tx.executeSql('DELETE FROM gunlugum WHERE id = ?',[this.state.id], (tx,results) =>{
+        console.log(results.rowsAffected);
+        if(results.rowsAffected > 0){
+          this.props.navigation.state.params.onGoBack();
+          this.props.navigation.goBack();
+        }
+    });
+  })
+
+}
+
+
 
 //----------------------------------------------------------------------------------------------------------
   render() {
@@ -171,9 +288,10 @@ oku(){
         <Header style={{backgroundColor:"purple",alignItems:'center'}}>
 
           <Left>
-            <Button transparent>
+            <TouchableOpacity onPress={() => {this.props.navigation.state.params.onGoBack();
+              this.props.navigation.goBack();}}>
                 <Icon name='arrow-back' />
-            </Button>
+            </TouchableOpacity>
           </Left>
 
           <Body>
@@ -182,11 +300,16 @@ oku(){
 
           <Right>
 
+            <TouchableOpacity onPress={this.sil.bind(this)}>
+              <Icon style={{color:'white',marginRight:20, fontSize:30}} name='md-trash' />
+            </TouchableOpacity>
+
+
             <TouchableOpacity onPress={this.oku.bind(this)}>
               <Icon style={{color:'white',marginRight:20, fontSize:30}} name='md-headset' />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={'Duzenle',{durum: this.state.durum, baslik: this.state.baslik, yazi:this.state.yazi, tarih: this.state.tarih, uri: this.state.uri, data:this.state.data, id: this.state.id}}>
+            <TouchableOpacity onPress={() => this.props.navigation.navigate("Duzenle",{baslik: this.state.baslik, yazi: this.state.yazi, durum: this.state.durum, id: this.state.id, data:this.state.data, uri: this.state.uri, sira: this.state.sira,onGoBack:this.refresh, tarih: this.state.tarih })}>
               <Icon style={{color:'white', fontSize:30}} name='md-create' />
             </TouchableOpacity>
 
@@ -241,16 +364,23 @@ oku(){
 
           <SafeAreaView  style={{margin:10, flex:2, justifyContent:'center'}}>
 
+          { this.state.uri !== null && this.state.uri !== "" ?
             <FlatList
               data={this.state.data}
               renderItem={this.renderFoto}
-              numColumns= {3}
+              numColumns= {5}
+              refreshing = {this.state.refresh}
               extraData={this.state.data}
               keyExtractor={item=>item.uri}
             >
 
             </FlatList>
 
+            :
+
+            null
+
+          }
           </SafeAreaView>
 
 
@@ -258,8 +388,6 @@ oku(){
         </View>
 
         </Content>
-
-
 
       </Container>
 
@@ -291,4 +419,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Sayfa;
+export default withNavigation(Sayfa);

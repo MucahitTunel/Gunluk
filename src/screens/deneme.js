@@ -50,13 +50,6 @@ import {
     }
 
 
-    componentWillUnmount(){
-      const {db} = this.state;
-
-      db.close()
-    }
-
-
 
     handleChangeGunlukAdi(a){
       this.setState({
@@ -88,15 +81,12 @@ import {
         (tx,results) => {
           if(results.rowsAffected > 0){
             console.log(results);
-            tx.executeSql('SELECT * FROM gunlukAdi',[], (tx, results) => {
-                var len = results.rows.length;
-                console.log("Uzunluk: "+len);
-                if(len > 0){
-                  var row = results.rows.item(0);
+            tx.executeSql('UPDATE baslangic SET deger = ?',[0], (tx, results) => {
+                if(results.rowsAffected > 0){
+                  this.props.navigation.navigate("Tabs");
                 }
-              });
-            Alert.alert('Success')
-            db.close();
+            });
+
           }
           else {
             Alert.alert('Unsuccesfull')
@@ -122,11 +112,11 @@ import {
       return (
 
         <View style={styles.container}>
-
+          <StatusBar hidden={true}/>
 
           <View style={styles.Head}>
 
-            <Animated.Text style={{ backgroundColor: 'transparent',fontSize:30, color:'red',opacity}}>
+            <Animated.Text style={{ backgroundColor: 'transparent',fontSize:40,opacity}}>
                 Günlük Adı
             </Animated.Text>
 
@@ -139,8 +129,9 @@ import {
               style={{
                 width: 300,
                 height: 300,
+                borderRadius:25,
                 transform: [{scale: opacity}] }}
-                source={{uri: 'https://images.unsplash.com/photo-1485832329521-e944d75fa65e?auto=format&fit=crop&w=1000&q=80&ixid=dW5zcGxhc2guY29tOzs7Ozs%3D'}}>
+                source={require('../pages/diary1.png')}>
 
             </Animated.Image>
           </View>
@@ -148,20 +139,18 @@ import {
           <View style={styles.Input}>
 
           <TextInput
-            placeholder="  İsim"
-            style={{width:300,borderColor:'yellow',backgroundColor:"gray", borderRadius:25,fontSize:16, color:'black'}}
+            placeholder="  Günlük Adı"
+            style={{width:300,borderColor:'yellow',backgroundColor:"white", borderRadius:25,fontSize:16, color:'black'}}
             onChangeText={this.handleChangeGunlukAdi}
-            onBlur={this.yukle}
             />
-
           </View>
 
           <View style={styles.Buton}>
 
           <TouchableOpacity
-            style={{width:300,height:50,alignItems:'center',justifyContent:'center', backgroundColor:'red', borderRadius:25}}
+            style={{width:300,height:50,alignItems:'center',justifyContent:'center', backgroundColor:'lightblue', borderRadius:25}}
             onPress={this.kaydet.bind(this)}>
-            <Text style={{fontSize:20, alignItems:'center'}}> KAYDET </Text>
+            <Text style={{fontSize:20, alignItems:'center', color:'red'}}> KAYDET </Text>
 
           </TouchableOpacity>
 
@@ -181,7 +170,7 @@ import {
 const styles = StyleSheet.create({
   container:{
     flex: 1,
-    backgroundColor: '#dbedcd'
+    backgroundColor: '#4fbdee'
   },
   Content:{
     flex: 5,

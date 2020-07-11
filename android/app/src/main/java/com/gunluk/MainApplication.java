@@ -7,6 +7,7 @@ import com.facebook.react.PackageList;
 import com.facebook.hermes.reactexecutor.HermesExecutorFactory;
 import com.facebook.react.bridge.JavaScriptExecutorFactory;
 import com.facebook.react.ReactApplication;
+import com.hopding.pdflib.PDFLibPackage;
 import com.avishayil.rnrestart.ReactNativeRestartPackage;
 import com.echo.reactandroidtts.RNAndroidTextToSpeechPackage;
 import net.no_mad.tts.TextToSpeechPackage;
@@ -42,6 +43,7 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.<ReactPackage>asList(
         new SQLitePluginPackage(),   // register SQLite Plugin here
         new MainReactPackage(),
+            new PDFLibPackage(),
             new ReactNativeRestartPackage(),
             new RNAndroidTextToSpeechPackage(),
             new TextToSpeechPackage(),

@@ -12,7 +12,8 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
-  AsyncStorage
+  AsyncStorage,
+
 } from 'react-native';
 
 import { SearchBar } from 'react-native-elements';
@@ -29,8 +30,7 @@ class AnaSayfa extends Component <Props>{
   constructor(props){
     super(props);
 
-
-
+    console.log("Constuctor Ana Sayfa");
 
     var SQLite = require('react-native-sqlite-storage');
     var db = SQLite.openDatabase({name:'gunluk.db', createFromLocation:'~gunluk.db'});
@@ -49,6 +49,9 @@ class AnaSayfa extends Component <Props>{
       db,
       search: '',
       a : 0,
+      tekrar:false,
+      boyut:10,
+      tip:"roboto",
     };
 
     this.handleChangeSearch = this.handleChangeSearch.bind(this);
@@ -60,13 +63,16 @@ class AnaSayfa extends Component <Props>{
     componentDidUpdate(){
       const {db} = this.state;
 
-
     }
 
-//----------------------------------------------------------------------------------------------------------
 
+
+//----------------------------------------------------------------------------------------------------------
 veritabani(){
   const {db} = this.state;
+
+
+
 
   db.transaction((tx) => {
     tx.executeSql('SELECT * FROM gunlugum',[], (tx,results) =>{
@@ -80,11 +86,32 @@ veritabani(){
       this.setState({
         data : degerler
       })
+      console.log("Data: " + this.state.data);
+
+    });
+  })
+
+  db.transaction((tx) => {
+    tx.executeSql('SELECT * FROM yazi',[], (tx,results) =>{
+      var boyut;
+      var tip;
+
+      boyut = results.rows.item(0).size;
+      tip = results.rows.item(0).tip;
+
+      this.setState({
+        boyut: boyut,
+        tip:tip,
+      })
       console.log(this.state.data);
 
     });
-
   })
+
+
+
+
+
 }
 
 
@@ -93,6 +120,17 @@ veritabani(){
 componentDidMount(){
 
   this.veritabani();
+  console.log("anasayfa");
+  this.didFocusListener = this.props.navigation.addListener(
+    'didFocus',
+    () => { this.veritabani() },
+  );
+
+  this.didFocusListener = this.props.navigation.addListener(
+    'didBlur',
+    () => { console.log("didblur"); },
+  );
+
 }
 
 //----------------------------------------------------------------------------------------------------------
@@ -172,12 +210,12 @@ refresh = () => {
   renderItem = ({ item }) => {
 
     var degerler = item.uri;
-    console.log("anasayfa item data =======>"+degerler);
+    console.log("anasayfa item data =======>"+item.uri);
 
 
 //1 tane değer varsa
     var arr = [];
-    var kontrol = 1;
+    var kontrol = 0;
 
     if(degerler === null){
       degerler = "";
@@ -185,10 +223,20 @@ refresh = () => {
       deger = this.state.a;
 
     }else {
+
+      for(var i = 0;i < degerler.length;i++){
+        if(degerler[i] === ","){
+          kontrol = 1;
+          break;
+        }else {
+          kontrol = 0;
+        }
+      }
+
       if(degerler !== ""){
         if(kontrol === 1){
+          console.log("burdyım");
           sonuc = degerler.split(',');
-
 
           for(let i = 0 ; i < sonuc.length; i++){
 
@@ -240,8 +288,8 @@ refresh = () => {
 
                 </View>
 
-                <View style={{marginRight:10, alignItems:'center',alignItems:'flex-end',marginRight:20,marginTop:10,flex:2}}>
-                  <Text style={{fontSize:15, color:'purple'}}>{item.tarih}</Text>
+                <View style={{marginRight:10, alignItems:'center',alignItems:'flex-end',marginRight:20,marginTop:10,flex:3}}>
+                  <Text style={{fontSize:this.state.boyut, fontFamily:this.state.tip}}>{item.tarih}</Text>
                 </View>
 
               </View>
@@ -249,12 +297,12 @@ refresh = () => {
               <View style={{flex:4,marginTop:5, borderRadius:10,borderBottomColor:'black',borderBottomWidth: 2}}>
 
                 <View style={{alignItems:'center', justifyContent:'center'}}>
-                <Text style={{fontSize:15, color:'purple'}}>{item.baslik}</Text>
+                <Text style={{fontSize:this.state.boyut, color:'purple', fontFamily:this.state.tip}}>{item.baslik}</Text>
                 </View>
 
 
                 <View style={{marginLeft:10}}>
-                <Text numberOfLines={4}>{item.yazi}</Text>
+                <Text numberOfLines={4} style={{fontSize:this.state.boyut, fontFamily:this.state.tip}}>{item.yazi}</Text>
                 </View>
 
               </View>
@@ -270,7 +318,7 @@ refresh = () => {
                 renderItem={this.renderFoto}
                 numColumns= {5}
                 refreshing={this.state.refreshing}
-                extraData={arr}
+                extraData={[arr,this.state.boyut]}
                 keyExtractor={item=>item.id.toString()}
               >
 
@@ -312,7 +360,7 @@ handleChangeSearch(a){
 
 
   db.transaction((tx) => {
-    tx.executeSql("SELECT * FROM gunlugum WHERE baslik LIKE ? and yazi LIKE ?",['%'+this.state.search+'%','%'+this.state.search+'%'], (tx,results) =>{
+    tx.executeSql("SELECT * FROM gunlugum WHERE baslik LIKE ?",['%'+this.state.search+'%'], (tx,results) =>{
       console.log("sonuc :    "  +results);
       var veriler = [];
       var uzunluk = results.rows.length;
@@ -378,6 +426,7 @@ handleChangeSearch(a){
 
         </ScrollView>
 
+        <StatusBar hidden={true}/>
       </View>
 
   );
@@ -405,6 +454,7 @@ const styles = StyleSheet.create({
     height: 300,
     borderRadius: 10,
   },
+
 });
 
 export default withNavigation(AnaSayfa);

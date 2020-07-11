@@ -23,12 +23,61 @@ class Ayarlar extends Component <Props>{
   constructor(props){
       super(props);
 
-      const list = [{name: 'Şifre'},{name: 'Yazı Tipi'},{name:'Yazı Boyutu'},{name:'Renk'},{name:'Hatırlatmalar'},{name:'Dil'},{name:'Pdf Şeklinde Dışa Ver'}]
+      console.log("Constructor Ayarlar");
+
+      console.log("constructor");
+      var SQLite = require('react-native-sqlite-storage');
+      var db = SQLite.openDatabase({name:'gunluk.db', createFromLocation:'~gunluk.db'});
+
+
+      const list = ["Şifre","Yazı Tipi","Yazı Boyutu","Renk","Hatırlatmalar", "Pdf Şeklinde Dışa Ver"]
+
 
       this.state = {
         list : list,
+        tip:"roboto",
+        boyut:15,
+        db,
       }
+
   }
+
+
+
+  componentDidMount(){
+    //this.yaziTipi();
+    this.yaziBoyutuTipi();
+    console.log("ayarlar");
+    this.didFocusListener = this.props.navigation.addListener(
+      'didFocus',
+      () => { this.yaziBoyutuTipi() },
+    );
+
+  }
+
+
+
+  yaziBoyutuTipi(){
+    console.log("yaziBoyutuTipi");
+    const {db} = this.state;
+
+    db.transaction((tx) => {
+      tx.executeSql('SELECT * FROM yazi',[], (tx,results) =>{
+        var tip;
+        var boyut;
+
+        boyut = results.rows.item(0).size;
+        tip = results.rows.item(0).tip;
+
+        this.setState({
+          boyut : boyut,
+          tip:tip,
+        })
+
+      });
+    })
+  }
+
 
 
 //-----------------------------------------------------------------------------------------------------------
@@ -47,8 +96,6 @@ class Ayarlar extends Component <Props>{
       return(<Image style={{width:en, height:boy,borderRadius:25}} source={require('../ayarlaricon/boyut.png')}/>)
     }else if (name === "Hatırlatmalar") {
       return(<Image style={{width:en, height:boy,borderRadius:25}} source={require('../ayarlaricon/zil.png')}/>)
-    }else if (name === "Dil") {
-      return(<Image style={{width:en, height:boy,borderRadius:25}} source={require('../ayarlaricon/dil.png')}/>)
     }else {
       return(<Image style={{width:en, height:boy,borderRadius:25}} source={require('../ayarlaricon/pdf.png')}/>)
     }
@@ -58,61 +105,63 @@ class Ayarlar extends Component <Props>{
 gonder = (name) => {
   if (name === "Şifre") {
     this.props.navigation.navigate("Sifre");
+  }else if (name === "Yazı Tipi") {
+    this.props.navigation.navigate("YaziTipi");
   }
+  else if (name === "Yazı Boyutu") {
+    this.props.navigation.navigate("YaziBoyutu");
+  }else if (name === "Hatırlatmalar") {
+    this.props.navigation.navigate("Hatirlatma");
+  }
+
 }
 
 
 
 //------------------------------------------------------------------------------------------------------------
-//format-letter-case
 
-  renderItem = ({ item }) => {
-
-    return(
-      <TouchableOpacity onPress={this.gonder.bind(this, item.name)}>
-        <View style={{flex:1, flexDirection:'row', height:60, alignItems:'center', justifyContent:'center',borderStyle:'solid', borderBottomColor:'black',borderBottomWidth: 1}}>
-
-
-            <View style={{flex:1}}>
-              {this.nameIcon(item.name)}
-            </View>
-
-            <View style={{flex:5}}>
-
-              <Text style={{fontFamily:"Menlo-Italic"}}> {item.name} </Text>
-
-            </View>
-
-
-        </View>
-        </TouchableOpacity>
-    )
-
-  }
 
 
 //------------------------------------------------------------------------------------------------------------
 
 
   render(){
-
+    console.log("render");
     return(
 
       <View style={{backgroundColor:'#eddada', flex:1}}>
 
         <View style={{backgroundColor:'#eddada'}}>
 
-            <SafeAreaView style={{margin:10}}>
+          {this.state.list.map((deger,key) =>{
 
-              <FlatList
-                data={this.state.list}
-                renderItem={this.renderItem}
-                keyExtractor={item=>item.name}
-              >
+            return(
+              <View key = {key}>
+              <TouchableOpacity onPress={this.gonder.bind(this, deger)}>
+              <View style={{marginTop:10, height:50,borderStyle:'solid', borderBottomColor:'black',borderBottomWidth: 1}}>
 
-              </FlatList>
+                  <View style={{flex:1, flexDirection:'row', height:60,alignItems:'center', justifyContent:'center'}}>
 
-            </SafeAreaView>
+                      <View style={{flex:1}}>
+                        {this.nameIcon(deger)}
+                      </View>
+
+                      <View style={{flex:5}}>
+
+                        <Text style={{fontFamily:this.state.tip, fontSize:this.state.boyut}}> {deger} </Text>
+
+                      </View>
+                  </View>
+
+              </View>
+              </TouchableOpacity>
+              </View>
+            );
+
+
+          })}
+
+
 
         </View>
 

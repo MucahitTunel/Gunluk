@@ -14,25 +14,9 @@ class Sifre extends Component<Props>{
     var SQLite = require('react-native-sqlite-storage');
     var db = SQLite.openDatabase({name: 'gunluk.db', createFromLocation: 1},this.okCallback,this.errorCallback);
 
-    var deger = 1;
-
-    db.transaction((tx) => {
-      tx.executeSql('SELECT * FROM sifre',[], (tx, results) => {
-            var len = results.rows.length;
-            console.log("len ======>>>>" + len);
-            if (len > 0) {
-              deger = 0;
-            }else {
-
-            }
-          });
-    });
-
-    console.log(deger);
-
     this.state = {
       kontrol : "0",
-      deger : deger,
+      deger : 0,
       sifre : "",
       sifreTekrar : "",
       soru : "",
@@ -41,7 +25,6 @@ class Sifre extends Component<Props>{
 
     }
 
-    console.log("constructor");
 
     this.handleChangeSifre = this.handleChangeSifre.bind(this);
     this.handleChangeSifreTekrar = this.handleChangeSifreTekrar.bind(this);
@@ -50,10 +33,28 @@ class Sifre extends Component<Props>{
 
   }
 
+
+async sifrekontrol(){
+  const {db} = this.state;
+
+  db.transaction((tx) => {
+    tx.executeSql('SELECT * FROM sifre',[], (tx, results) => {
+          var len = results.rows.length;
+          console.log("len ======>>>>" + len);
+          if (len > 0) {
+            this.setState({
+              deger:1
+            })
+          }
+        });
+  });
+}
+
 //------------------------------------------------------------------------------
 componentDidMount(){
 
-
+  console.log("Component Did Mount");
+  this.sifrekontrol();
 
 }
 
@@ -161,43 +162,7 @@ kaydet(){
           onChangeText={this.handleChangeSifreTekrar}
         />
 
-        <View style={{marginTop: 20}}>
 
-          <Text style={{color:'red'}}>*Not: <Text style={{color:'black'}}>Aşağıdaki kısma istediğiniz soru ve cevabı yazınız. Şifrenizi unuttuğunuz takdirde burada verdiğiniz cevap sayesinde şifrenizi görebilirsiniz!!!</Text></Text>
-
-        </View>
-
-        <View style={{marginTop:15, borderBottomColor:'black',borderBottomWidth: 1}}>
-
-          <Text style={{fontSize:25}}> Soru </Text>
-
-        </View>
-
-        <View style={{marginTop:5}}>
-
-          <TextInput
-            placeholder="Soru"
-            style={{backgroundColor:"white", borderRadius:25,fontSize:15, color:'black', height:45, marginTop: 15}}
-            onChangeText={this.handleChangeSoru}
-          />
-
-        </View>
-
-        <View style={{marginTop:15, borderBottomColor:'black',borderBottomWidth: 1}}>
-
-          <Text style={{fontSize:25}}> Cevap </Text>
-
-        </View>
-
-        <View style={{marginTop:5}}>
-
-          <TextInput
-            placeholder="Cevap"
-            style={{backgroundColor:"white", borderRadius:25,fontSize:15, color:'black', height:45, marginTop: 15}}
-            onChangeText={this.handleChangeCevap}
-          />
-
-        </View>
 
         <View style={{flexDirection:'row', marginTop: 20, justifyContent:'center', flex:1, alignItems:'center'}}>
 
@@ -229,87 +194,142 @@ kaydet(){
   }
 
 
+  sifreSil = () =>{
+    const {db} = this.state;
+
+    db.transaction((tx) => {
+      tx.executeSql('DELETE FROM sifre',[], (tx,results) =>{
+          console.log(results.rowsAffected);
+          if(results.rowsAffected > 0){
+            console.log("Silindi");
+            this.setState({
+              deger : 0,
+            })
+          }
+      });
+    })
+
+  }
+
+
 
 
 
 
   render(){
 
-    console.log("render");
+    if(this.state.deger === 0){
+      return(
 
-    return(
+        <Container style={{backgroundColor:'#eddada'}}>
 
-      <Container style={{backgroundColor:'#eddada'}}>
+        <Header style={{backgroundColor:"purple",alignItems:'center', justifyContent:'center'}}>
+          <Left>
+            <Button transparent>
+              <Icon name='arrow-back' />
+            </Button>
+          </Left>
+          <Body>
+            <Title>Şifre</Title>
+          </Body>
+          <Right>
 
-      <Header style={{backgroundColor:"purple",alignItems:'center', justifyContent:'center'}}>
-        <Left>
-          <Button transparent>
-            <Icon name='arrow-back' />
-          </Button>
-        </Left>
-        <Body>
-          <Title>Şifre</Title>
-        </Body>
-        <Right>
+              <Image
 
-            <Image
+              style={{height:50, width:50, borderRadius:30}}
+              source={require('../../ayarlaricon/sifre.png')}
 
-            style={{height:50, width:50, borderRadius:30}}
-            source={require('../../ayarlaricon/sifre.png')}
+              />
 
-            />
+          </Right>
+        </Header>
 
-        </Right>
-      </Header>
+        <Content>
 
-      <Content>
+            <View>
+              <TouchableOpacity style={{borderStyle:'solid', borderBottomColor:'black',borderBottomWidth: 1, borderTopWidth:1, justifyContent:'center'}} onPress={ () => this.setState({ kontrol : "1"})}>
+                <View style={{margin:10,justifyContent:'center', height:50}} >
+
+                    <Text style={{fontSize:25}}>Şifre Oluştur</Text>
+
+                </View>
+              </TouchableOpacity>
+
+              <View style={{margin:10}}>
+                {this.state.kontrol === "1" ?
+                  this.sifreOlustur()
+                  :
+                  null
+                }
+              </View>
+
+            </View>
+
+        </Content>
+
+        </Container>
 
 
 
+      );
+    }else {
 
-        {this.state.deger === 1 ?
+      return(
+
+        <Container style={{backgroundColor:'#eddada'}}>
+
+        <Header style={{backgroundColor:"purple",alignItems:'center', justifyContent:'center'}}>
+          <Left>
+            <Button transparent>
+              <Icon name='arrow-back' />
+            </Button>
+          </Left>
+          <Body>
+            <Title>Şifre</Title>
+          </Body>
+          <Right>
+
+              <Image
+
+              style={{height:50, width:50, borderRadius:30}}
+              source={require('../../ayarlaricon/sifre.png')}
+
+              />
+
+          </Right>
+        </Header>
+
+        <Content>
 
           <View>
-            <Text> Buradayım </Text>
-          </View>
+            <TouchableOpacity style={{borderStyle:'solid', borderBottomColor:'black',borderBottomWidth: 1, borderTopWidth:1, justifyContent:'center'}} onPress={this.sifreSil.bind(this)}>
+              <View style={{margin:10,justifyContent:'center', height:50}}>
 
-          :
-
-          <View>
-            <TouchableOpacity style={{alignItems:'center', justifyContent:'center'}} onPress={ () => this.setState({ kontrol : "1"})}>
-              <View style={{margin:10,borderStyle:'solid', borderBottomColor:'black',borderBottomWidth: 1, borderTopWidth:1, alignItems:'center', height:50}} >
-
-                  <Text style={{fontSize:25}}> ↓↓↓↓   Şifre Oluştur   ↓↓↓↓ </Text>
+                  <Text style={{fontSize:25}}>Şifre Sil</Text>
 
               </View>
             </TouchableOpacity>
-
-            <View style={{margin:10}}>
-              {this.state.kontrol === "1" ? this.sifreOlustur() : <Text> Sonraki Sefer </Text>}
-            </View>
-
           </View>
 
-        }
+        </Content>
+
+        </Container>
 
 
 
-
-      </Content>
-
-
+      );
+    }
 
 
 
-      </Container>
-
-
-
-    );
   }
 
 
 
 }
+
+
+
+
 
 export default Sifre;

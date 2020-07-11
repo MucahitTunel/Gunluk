@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Header, Content, Tab, Tabs,Button, Left, Body, Right, Icon, Title, Item, Input, Form, Textarea, TabHeading } from 'native-base';
+import { Container, Header, Content, Tab, Tabs,Button, Left, Body, Right, Icon, Title, Item, Input, Form, Textarea, TabHeading,StatusBar } from 'native-base';
 import {TouchableOpacity} from 'react-native';
 import AnaSayfa from './AnaSayfa';
 import Galeri from './Galeri.js';
@@ -13,7 +13,7 @@ export default class TabsExample extends Component {
   constructor(props){
     super(props);
 
-
+    console.log("tabs constructor");
     this.state = {
       refreshing : false,
       deger : 0,
@@ -26,7 +26,7 @@ export default class TabsExample extends Component {
 
 
   yenile = () => {
-
+    console.log("sayfa yenilendi************************************");
     if (this.state.deger === 0) {
       this.setState({
         deger : 1
@@ -39,11 +39,24 @@ export default class TabsExample extends Component {
 
   }//Yenile Sayfası
 
+  componentDidMount() {
+    console.log("didmount");
+    this.didFocusListener = this.props.navigation.addListener(
+      'didFocus',
+      () => { this.yenile.bind(this) },
+    );
+  }
+
+  componentWillUnmount() {
+    console.log("remove");
+    this.didFocusListener.remove();
+  }
+
 
   render() {
 
     const {navigation} = this.props;
-    console.log("tekrar");
+    console.log("Tabs render");
 
     return (
       <Container style={{backgroundColor:'#eddada'}}>

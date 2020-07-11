@@ -19,19 +19,14 @@ import {
   Alert,
   AsyncStorage,
   ToastAndroid,
-  BackHandler
+  BackHandler,
+  DatePickerAndroid,
 } from 'react-native';
 
 
 
 import { Container, Header,Button, Left, Body, Right, Icon, Title, Content, Item, Input, Form, Textarea} from 'native-base';
 const window = Dimensions.get('window');
-
-
-
-
-
-
 
 
 /*
@@ -71,10 +66,13 @@ const window = Dimensions.get('window');
       uri:'',
       sira : 0,
       db,
-      durum: '',
+      durum: 'mutlu',
+      boyut:15,
+      tip:"roboto",
+      days : ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'],
 
     };
-
+    this.showDatePicker.bind(this);
     const {navigation} = this.props;
 
     console.log("tekrardan");
@@ -86,6 +84,26 @@ const window = Dimensions.get('window');
 
 
   }
+
+  showDatePicker = async (options) => {
+    try {
+      const {action, year, month, day} = await DatePickerAndroid.open(options);
+      if (action !== DatePickerAndroid.dismissedAction) {
+
+
+        var intday = new Date(year,month,day).getDay();
+        console.log(intday);
+        let newState = {};
+        newState['tarih'] = this.state.days[intday] + ", " + day + "." + (month+1) + "." + year;
+
+        this.setState(newState);
+      }
+    } catch ({code, message}) {
+      console.warn(`error `, code, message);
+    }
+};
+
+
 
 
   chooseFile = () => {
@@ -118,53 +136,43 @@ const window = Dimensions.get('window');
           filePath: source,
           data: cevap,
         });
-
-        let path = "";
-        let sonpath = "";
-
-
-        if(this.state.uri === ""){
-          path = this.state.filePath.uri;
-          sonpath = this.state.uri.concat(path);
-        }
-        else {
-          path = ","+this.state.filePath.uri;
-          sonpath = this.state.uri.concat(path);
-        }
-
-
-
-
-      //  var veri = this.state.filePath.uri;
-      //  var joined = this.state.veriler.concat(veri);
-
-      //  console.log("joined:  " + joined);
-
-        this.setState({
-          selected: true,
-          uri : sonpath,
-        })
-        console.log("SonPath:   " + this.state.uri);
-        console.log("Data:  " + this.state.data);
-
       }
-    });
-  };
-
-
-
+    });//Image picker
+  }
 
 
 
   componentDidMount(){
 
     this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
-    var date = new Date().getDate();
-    var month = new Date().getMonth() + 1; //Current Month
-    var year = new Date().getFullYear(); //Current Year
-    this.setState({
-      tarih: date + '.' + month + '.' + year,
-    });
+    const {db} = this.state;
+
+    db.transaction((tx) => {
+      tx.executeSql('SELECT * FROM yazi',[], (tx,results) =>{
+        var boyut;
+        var tip;
+
+        boyut = results.rows.item(0).size;
+        tip = results.rows.item(0).tip;
+
+        var date = new Date().getDate();
+        var month = new Date().getMonth() + 1; //Current Month
+        var year = new Date().getFullYear(); //Current Year
+        var day = new Date().getDay();
+        var tarih = this.state.days[day] + ", " + date + "." + month + "." + year;
+
+        this.setState({
+          boyut: boyut,
+          tip:tip,
+          tarih: tarih,
+        })
+        console.log(this.state.data);
+
+      });
+    })
+
+
+
 
 
   }
@@ -300,6 +308,28 @@ const window = Dimensions.get('window');
   }
 
 
+  async tarih(){
+
+    try {
+      const {action, year, month, day} = await DatePickerAndroid.open({
+        // Use `new Date()` for current date.
+        // May 25 2020. Month 0 is January.
+        date: new Date(),
+
+      });
+
+      if (action !== DatePickerAndroid.dismissedAction) {
+        // Selected year, month (0-11), day
+        var tarih = day + '.' + (month+1) + '.' + year;
+        console.log(tarih);
+      //  this.setState({tarih:tarih})
+      }
+
+    } catch ({code, message}) {
+      console.warn('Cannot open date picker', message);
+    }
+  }
+
 
 
   kaydet(){
@@ -307,7 +337,7 @@ const window = Dimensions.get('window');
     const {db} = this.state;
     console.log("kaydet");
     db.transaction((tx) => {
-      tx.executeSql('INSERT INTO gunlugum(baslik, yazi, tarih, durum,uri) VALUES(?,?,?,?,?)',[this.state.baslik, this.state.gunluk, this.state.tarih, "mutlu", this.state.uri], (tx, results) => {
+      tx.executeSql('INSERT INTO gunlugum(baslik, yazi, tarih, durum,uri) VALUES(?,?,?,?,?)',[this.state.baslik, this.state.gunluk, this.state.tarih, this.state.durum, this.state.uri], (tx, results) => {
           if(results.rowsAffected > 0){
             ToastAndroid.show('Kaydedildi', ToastAndroid.SHORT);
             this.props.navigation.state.params.onGoBack();
@@ -334,6 +364,28 @@ const window = Dimensions.get('window');
     });
     console.log(this.state.gunluk);
   }
+
+
+  async fetchData(){
+    var formData = new FormData();
+    var url = "http://192.168.1.107:8080/upload/";
+    let picturepath = "file://"+this.state.filePath.path;
+    let fileName = this.state.filePath.fileName;
+
+    formData.append("Urun_Foto", {uri:picturepath,name:fileName,  type:"image/jpeg"})
+    formData.append("Name", "Mücahit")
+
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
+      headers:{
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    console.log(response);
+  }
+
 
 
     render(){
@@ -384,9 +436,11 @@ const window = Dimensions.get('window');
                 </TouchableOpacity>
 
                   <View style={{flex:3, alignItems:'flex-end'}}>
-                    <Text style={{alignItems: 'center', justifyContent:'flex-end', fontSize:14}}>
-                      {this.state.tarih}
-                    </Text>
+                    <TouchableOpacity onPress={() => this.showDatePicker({tarih: this.state.tarih})}>
+                      <Text style={{alignItems: 'center', justifyContent:'flex-end', fontSize:this.state.boyut, fontFamily:this.state.tip}}>
+                        {this.state.tarih}
+                      </Text>
+                    </TouchableOpacity>
                   </View>
 
 
@@ -396,7 +450,7 @@ const window = Dimensions.get('window');
 
                     <TextInput
                       placeholder="Başlık"
-                      style={{marginTop:20, marginLeft:20, marginRight:20, backgroundColor:"white", borderRadius:25,fontSize:12, color:'black', height:35}}
+                      style={{marginTop:20, marginLeft:20, marginRight:20, backgroundColor:"white", borderRadius:25,fontSize:this.state.boyut,fontFamily:this.state.tip, color:'black'}}
                       onChangeText={this.handleChangeBaslik}
                       />
 
@@ -405,7 +459,7 @@ const window = Dimensions.get('window');
                         rowSpan={10}
                         bordered
                         placeholder="Yazınız..."
-                        style={{marginTop:10, marginLeft:20, marginRight:20,marginBottom:30, backgroundColor:"white", fontSize:16, color:"black", borderRadius:25}}
+                        style={{marginTop:10, marginLeft:20, marginRight:20,marginBottom:30, backgroundColor:"white", fontSize:this.state.boyut,fontFamily:this.state.tip, color:"black", borderRadius:25}}
                         onChangeText={this.handleChangeGunluk}/>
                     </Form>
 
@@ -428,19 +482,22 @@ const window = Dimensions.get('window');
 
                       style={{width:100, height:60, marginLeft:50, marginTop:10, backgroundColor:'pink', alignItems:'center', justifyContent:'center'}}
                       onPress={this.chooseFile.bind(this)}
-
                     >
 
-                    <Button
-                    style={{width:100, height:60, marginLeft:150, marginTop:10, backgroundColor:'pink', alignItems:'center', justifyContent:'center'}}
-                    onPress={this.chooseFile.bind(this)}
-                    />
-
                     <Icon
-                      name='image'
-
+                      name = 'image'
+                      style={{fontSize:40}}
                     />
 
+                    </TouchableOpacity>
+
+
+                    <TouchableOpacity
+
+                      style={{width:100, height:60, marginLeft:50, marginTop:10, backgroundColor:'pink', alignItems:'center', justifyContent:'center'}}
+                      onPress={this.fetchData.bind(this)}
+                    >
+                      <Text>Fetch</Text>
 
                     </TouchableOpacity>
 
@@ -451,12 +508,6 @@ const window = Dimensions.get('window');
 
           </Content>
       </Container>
-
-
-
-
-
-
 
   );
   }

@@ -40,7 +40,42 @@ class Sayfa extends Component <Props>{
     const data = navigation.getParam('data');
     const id = navigation.getParam('id');
 
+    //data sayfa geçiş kontrolü
+
+    console.log(data);
+    console.log("**************************data id****************************");
+    var sol = 0;
+    var sag = 0;
+    var solkontrol = 0;
+    var sagkontrol = 0;
+    console.log("Data uzunluğu");
+    console.log(data.length);
+    if(data.length > 1){
+
+      for(var i = 0; i < data.length-1; i++){
+        console.log("for döngüsü");
+        if(data[i+1].id === id){
+          console.log("bura");
+          sol = i;
+          solkontrol = 1;
+        }
+        if(data[i].id === id){
+          console.log("kontrol----------------");
+          if(data[i+1].id !== null){
+            console.log("burası***********************");
+            sag = i+1;
+            sagkontrol = 1;
+          }
+        }
+      }
+    }
+
+    console.log("sol kontrol:  "+sol);
+    console.log("sağ kontrol:  "+sag);
+    //data sayfa kontrol sonu
+
     console.log("id====>" + id);
+    console.log(data);
 
     var modlar = ['artist','deli','dusunceli','hasta','hayalkirikligi','kederli','kendinibegenmis','mutlu','parti','sasirmis','sinirli','sicak','soguk','supheli','telasli','uykulu','uyusuk','zengin'];
 
@@ -82,27 +117,27 @@ class Sayfa extends Component <Props>{
 
     }
 
-
-
     this.state = {
-
         durum : durum,
         baslik: baslik,
         yazi: yazi,
         tarih: tarih,
         uri: uri,
         data:arr,
+        gelendata : data,
         id:id,
         sira:sira,
         refresh : false,
         db,
-
+        boyut:10,
+        tip:"roboto",
+        sol:sol,
+        sag:sag,
+        solkontrol:solkontrol,
+        sagkontrol:sagkontrol,
 
     };
-
   }
-
-
 //----------------------------------------------------------------------------------------------------------
 
     renderFoto = ({ item }) => {
@@ -125,6 +160,9 @@ class Sayfa extends Component <Props>{
 //----------------------------------------------------------------------------------------------------------
 componentDidMount() {
 this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
+
+this.veritabani();
+
 }
 
 componentWillUnmount() {
@@ -135,6 +173,28 @@ handleBackPress = () => {
     this.props.navigation.state.params.onGoBack();
     this.props.navigation.goBack(); // works best when the goBack is async
     return true;
+}
+
+
+veritabani(){
+  const {db} = this.state;
+
+  db.transaction((tx) => {
+    tx.executeSql('SELECT * FROM yazi',[], (tx,results) =>{
+      var boyut;
+      var tip;
+
+      boyut = results.rows.item(0).size;
+      tip = results.rows.item(0).tip;
+
+      this.setState({
+        boyut: boyut,
+        tip:tip,
+      })
+      console.log(this.state.data);
+
+    });
+  })
 }
 //----------------------------------------------------------------------------------------------------------
 
@@ -195,6 +255,7 @@ componentDidUpdate(){
 refresh = (id) => {
 
   const {db} = this.state;
+  console.log("Aranacak id: " + id);
 
   db.transaction((tx) => {
     tx.executeSql('SELECT * FROM gunlugum WHERE id = ?',[id], (tx,results) =>{
@@ -229,6 +290,44 @@ refresh = (id) => {
 
       }
 
+      var sol = 0;
+      var sag = 0;
+      var solkontrol = 0;
+      var sagkontrol = 0;
+      console.log("Data uzunluğu");
+      console.log("id:  " + id);
+
+      console.log(this.state.gelendata.length);
+
+      for(var i = 0; i < this.state.gelendata.length-1; i++){
+          console.log("for döngüsü");
+          if(this.state.gelendata[i+1].id === id){
+            console.log("bura");
+            sol = i;
+            solkontrol = 1;
+          }
+          if(this.state.gelendata[i].id === id){
+            console.log("kontrol----------------");
+            if(this.state.gelendata[i+1].id !== null){
+              console.log("burası***********************");
+              sag = i+1;
+              sagkontrol = 1;
+            }
+          }
+      }
+
+
+        console.log("refresh kontrol *****************************************************************************");
+        console.log(sol);
+        console.log(sag);
+        console.log(solkontrol);
+        console.log(sagkontrol);
+
+
+
+
+
+
       this.setState({
         baslik : baslik,
         yazi : yazi,
@@ -237,6 +336,10 @@ refresh = (id) => {
         uri:uri,
         refresh: true,
         data:degerler,
+        sag:sag,
+        sol:sol,
+        sagkontrol:sagkontrol,
+        solkontrol:solkontrol,
       })
     });
 
@@ -265,15 +368,97 @@ sil(){
     tx.executeSql('DELETE FROM gunlugum WHERE id = ?',[this.state.id], (tx,results) =>{
         console.log(results.rowsAffected);
         if(results.rowsAffected > 0){
-          this.props.navigation.state.params.onGoBack();
+          //this.props.navigation.state.params.onGoBack();
           this.props.navigation.goBack();
         }
     });
   })
 
 }
+//--------------------------------------------------------------------------------------------------------
+
+gecisKontrol(){
+  console.log("kontroller----------------------------------/////////////////////////////////////////////");
+  console.log(this.state.sol);
+  console.log(this.state.sag);
+  console.log("id: " + this.state.gelendata[this.state.sag].id);
+  if(this.state.solkontrol === 1 && this.state.sagkontrol === 1){
+    console.log("1");
+    return(
+
+      <View style={{flexDirection:"row", alignItems:"center", backgroundColor:"yellow"}}>
+
+      <View>
+        <TouchableOpacity onPress={this.refresh.bind(this,this.state.gelendata[this.state.sol].id)}>
+            <View style={{ width:100, height:40, marginLeft:20,marginRight:10 ,alignItems:"center", justifyContent:"center"}}>
+            <Icon
+              name='md-arrow-dropleft'
+              style={{color:'orange',marginRight:20, fontSize:70}}
+            />
+            </View>
+        </TouchableOpacity>
+      </View>
 
 
+      <View style={{marginLeft:20, backgroundColor:"red"}}>
+        <TouchableOpacity onPress={this.refresh.bind(this,this.state.gelendata[this.state.sag].id)}>
+          <View style={{ width:100, height:40, marginRight:20,marginLeft:10 ,alignItems:"center", justifyContent:"center"}}>
+
+          <Icon
+            name='md-arrow-dropright'
+            style={{color:'blue',marginRight:20, fontSize:70}}
+          />
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      </View>
+
+    );
+  }else if (this.state.solkontrol === 1 && this.state.sagkontrol === 0) {
+    console.log("2");
+    return(
+
+      <View style={{height:40}}>
+
+      <TouchableOpacity onPress={this.refresh.bind(this,this.state.gelendata[this.state.sol].id)}>
+        <View style={{ width:100, height:40, marginRight:20,marginLeft:10 ,alignItems:"center", justifyContent:"center"}}>
+        <Icon
+          name='md-arrow-dropleft'
+          style={{color:'orange',marginRight:20, fontSize:70}}
+        />
+        </View>
+      </TouchableOpacity>
+
+
+      </View>
+
+    );
+  }else if (this.state.solkontrol === 0 && this.state.sagkontrol === 1){
+    console.log("3");
+    return(
+
+      <View style={{height:40}}>
+
+        <TouchableOpacity onPress={this.refresh.bind(this,this.state.gelendata[this.state.sag].id)}>
+          <View style={{ width:100, height:40, marginRight:20,marginLeft:10 ,alignItems:"center", justifyContent:"center"}}>
+          <Icon
+            name='md-arrow-dropright'
+            style={{color:'blue',marginRight:20, fontSize:70}}
+          />
+          </View>
+        </TouchableOpacity>
+
+      </View>
+
+    );
+  }else {
+    console.log("4");
+    return(null);
+  }
+
+
+}
 
 //----------------------------------------------------------------------------------------------------------
   render() {
@@ -309,7 +494,7 @@ sil(){
               <Icon style={{color:'white',marginRight:20, fontSize:30}} name='md-headset' />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => this.props.navigation.navigate("Duzenle",{baslik: this.state.baslik, yazi: this.state.yazi, durum: this.state.durum, id: this.state.id, data:this.state.data, uri: this.state.uri, sira: this.state.sira,onGoBack:this.refresh, tarih: this.state.tarih })}>
+            <TouchableOpacity onPress={() => this.props.navigation.navigate("Duzenle",{baslik: this.state.baslik, yazi: this.state.yazi, durum: this.state.durum, id: this.state.id, data:this.state.data, uri: this.state.uri, sira: this.state.sira,onGoBack:this.refresh, tarih: this.state.tarih, boyut: this.state.boyut, tip:this.state.tip })}>
               <Icon style={{color:'white', fontSize:30}} name='md-create' />
             </TouchableOpacity>
 
@@ -336,11 +521,9 @@ sil(){
 
               <View style={{alignItems:'flex-end', justifyContent:'center', marginTop:10}}>
 
-                <Text style={{fontSize:16}}>{this.state.tarih}</Text>
+                <Text style={{fontSize:this.state.boyut, fontFamily:this.state.tip}}>{this.state.tarih}</Text>
 
               </View>
-
-
 
             </View>
 
@@ -351,12 +534,12 @@ sil(){
           <View style={{flex:5, marginTop:10}}>
 
             <View style={{alignItems:'center'}}>
-              <Text style={{color:'purple'}}>{this.state.baslik}</Text>
+              <Text style={{color:'purple', fontSize:this.state.boyut,fontFamily:this.state.tip}}>{this.state.baslik}</Text>
             </View>
 
             <View style={{marginTop:10}}>
 
-              <Text style={{fontSize:12}}>{this.state.yazi}</Text>
+              <Text style={{fontSize:this.state.boyut,fontFamily:this.state.tip}}>{this.state.yazi}</Text>
 
             </View>
 
@@ -383,9 +566,18 @@ sil(){
           }
           </SafeAreaView>
 
+          <View style={{alignItems:'center'}}>
+
+            {this.gecisKontrol()}
+
+          </View>
+
+
 
 
         </View>
+
+
 
         </Content>
 

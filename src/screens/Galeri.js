@@ -25,6 +25,8 @@ class Galeri extends Component <Props>{
   constructor(props){
     super(props);
 
+    console.log("Constructor Galeri");
+
     var SQLite = require('react-native-sqlite-storage');
     var db = SQLite.openDatabase({name:'gunluk.db', createFromLocation:'~gunluk.db'});
 
@@ -89,12 +91,9 @@ class Galeri extends Component <Props>{
     }
 
 //----------------------------------------------------------------------------------------------------------
-  /*  componentDidMount(){
+/*    componentDidMount(){
 
-      const {db} = this.state;
-
-
-  }*/
+}*/
 
 //----------------------------------------------------------------------------------------------------------
 

@@ -38,6 +38,8 @@ target 'gunluk' do
 
   pod 'RCTRestart', :path => '../node_modules/react-native-restart'
 
+  pod 'RNReactNativePdfLib', :path => '../node_modules/react-native-pdf-lib'
+
   target 'gunlukTests' do
     inherit! :search_paths
     # Pods for testing

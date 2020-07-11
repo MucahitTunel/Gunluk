@@ -18,19 +18,14 @@ import {
   TouchableOpacity,
   Alert,
   AsyncStorage,
-  BackHandler
+  BackHandler,
+  DatePickerAndroid
 } from 'react-native';
 
 
 
 import { Container, Header,Button, Left, Body, Right, Icon, Title, Content, Item, Input, Form, Textarea} from 'native-base';
 const window = Dimensions.get('window');
-
-
-
-
-
-
 
 
 /*
@@ -50,10 +45,12 @@ const window = Dimensions.get('window');
 
 */
 
-  class GunlukEkle extends Component<Props>{
+  class Duzenle extends Component<Props>{
 
     constructor(props){
     super(props)
+
+    console.log("Düzenle constructor");
 
     var SQLite = require('react-native-sqlite-storage');
     var db = SQLite.openDatabase({name:'gunluk.db', createFromLocation:'~gunluk.db'});
@@ -69,6 +66,9 @@ const window = Dimensions.get('window');
     const uri = navigation.getParam("uri");
     const id = navigation.getParam("id");
     const sira = navigation.getParam("sira");
+    const boyut = navigation.getParam("boyut");
+    const tip = navigation.getParam("tip");
+
 
 
 
@@ -120,22 +120,23 @@ const window = Dimensions.get('window');
       id:id,
       navigation:navigation,
       uriler:dizi,
+      boyut:boyut,
+      tip:tip,
+      days : ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'],
     };
 
     console.log(tarih);
 
-
-
-
-
-
     this.handleChangeBaslik = this.handleChangeBaslik.bind(this);
     this.handleChangeGunluk = this.handleChangeGunluk.bind(this);
 
-
-
-
   }
+
+
+
+
+
+
 
 
   chooseFile = () => {
@@ -224,6 +225,27 @@ const window = Dimensions.get('window');
 
 
 
+
+  showDatePicker = async (options) => {
+    try {
+      const {action, year, month, day} = await DatePickerAndroid.open(options);
+      if (action !== DatePickerAndroid.dismissedAction) {
+
+
+        var intday = new Date(year,month,day).getDay();
+        console.log(intday);
+        let newState = {};
+        newState['tarih'] = this.state.days[intday] + ", " + day + "." + (month+1) + "." + year;;
+
+        this.setState(newState);
+      }
+    } catch ({code, message}) {
+      console.warn(`error `, code, message);
+    }
+};
+
+
+
   deleteItem = uri =>{
 
 
@@ -269,8 +291,8 @@ const window = Dimensions.get('window');
        console.log("uri son hali :    " + this.state.uri);
     }else {
       this.setState({
-        uriler: filteredData,
-        uri : urison,
+        uriler: "",
+        uri : "",
        });
     }
 
@@ -393,11 +415,12 @@ handleBackPress = () => {
     console.log(this.state.uri);
     console.log(this.state.durum);
     console.log(this.state.id);
+    console.log(this.state.tarih);
 
 
 
     db.transaction((tx) => {
-      tx.executeSql('UPDATE gunlugum SET baslik = ? , yazi = ? , uri = ? , durum = ? WHERE id = ?' ,[this.state.baslik, this.state.gunluk, this.state.uri, this.state.durum, this.state.id], (tx, results) => {
+      tx.executeSql('UPDATE gunlugum SET baslik = ? , yazi = ? , uri = ? , durum = ?, tarih = ? WHERE id = ?' ,[this.state.baslik, this.state.gunluk, this.state.uri, this.state.durum,this.state.tarih, this.state.id ], (tx, results) => {
         console.log(results.rowsAffected);
           if(results.rowsAffected > 0){
             navigation.state.params.onGoBack(this.state.id);
@@ -433,7 +456,7 @@ handleBackPress = () => {
 
 
     render(){
-
+      console.log("render");
       return (
 
           <Container style={styles.container}>
@@ -480,9 +503,13 @@ handleBackPress = () => {
                 </TouchableOpacity>
 
                   <View style={{flex:3, alignItems:'flex-end'}}>
-                    <Text style={{alignItems: 'center', justifyContent:'flex-end', fontSize:14}}>
-                      {this.state.tarih}
-                    </Text>
+
+                    <TouchableOpacity onPress={() => this.showDatePicker({tarih: this.state.tarih})}>
+                      <Text style={{alignItems: 'center', justifyContent:'flex-end', fontSize:this.state.boyut, fontFamily:this.state.tip}}>
+                        {this.state.tarih}
+                      </Text>
+                    </TouchableOpacity>
+
                   </View>
 
 
@@ -492,7 +519,7 @@ handleBackPress = () => {
 
                     <TextInput
                       placeholder="Başlık"
-                      style={{marginTop:20, marginLeft:20, marginRight:20, backgroundColor:"white", borderRadius:25,fontSize:12, color:'black', height:35}}
+                      style={{marginTop:20, marginLeft:20, marginRight:20, backgroundColor:"white", borderRadius:25,fontSize:this.state.boyut,fontFamily:this.state.tip, color:'black'}}
                       onChangeText={this.handleChangeBaslik}
                       value={this.state.baslik}
                       />
@@ -502,7 +529,7 @@ handleBackPress = () => {
                     <TextInput
                         multiline = {true}
                         placeholder="Yazınız..."
-                        style={{marginTop:10, marginLeft:20, marginRight:20,marginBottom:30, backgroundColor:"white", fontSize:16, color:"black", borderRadius:25}}
+                        style={{marginTop:10, marginLeft:20, marginRight:20,marginBottom:30, backgroundColor:"white", fontSize:this.state.boyut,fontFamily:this.state.tip, color:"black", borderRadius:25}}
                         numberOfLines = {10}
                         value={this.state.gunluk}
                         onChangeText={this.handleChangeGunluk}
@@ -537,18 +564,10 @@ handleBackPress = () => {
                       onPress={this.chooseFile.bind(this)}
 
                     >
-
-                    <Button
-                    style={{width:100, height:60, marginLeft:150, marginTop:10, backgroundColor:'pink', alignItems:'center', justifyContent:'center'}}
-                    onPress={this.chooseFile.bind(this)}
-                    />
-
                     <Icon
-                      name='image'
-
+                      name = 'image'
+                      style={{fontSize:40}}
                     />
-
-
                     </TouchableOpacity>
 
                 </View>
@@ -558,11 +577,6 @@ handleBackPress = () => {
 
           </Content>
       </Container>
-
-
-
-
-
 
   );
   }
@@ -579,4 +593,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default GunlukEkle;
+export default Duzenle;

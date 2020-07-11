@@ -53,6 +53,9 @@ class EmojiListesi extends Component <Props>{
 
     const sira = navigation.getParam("sira");
 
+    var SQLite = require('react-native-sqlite-storage');
+    var db = SQLite.openDatabase({name:'gunluk.db', createFromLocation:'~gunluk.db'});
+
     /*const baslik = navigation.getParam("baslik");
     const yazi = navigation.getParam("yazi");
     const tarih = navigation.getParam("tarih");
@@ -77,11 +80,41 @@ class EmojiListesi extends Component <Props>{
 
         data : ['artist','deli','dusunceli','hasta','hayalkirikligi','kederli','kendinibegenmis','mutlu','parti','sasirmis','sinirli','sicak','soguk','supheli','telasli','uykulu','uyusuk','zengin'],
         checked:sira,
+        db,
+        boyut:15,
+        tip:"roboto",
 
     };
 
     console.log("checked:  " + this.state.checked);
 
+  }
+
+
+  componentDidMount(){
+    const {db} = this.state;
+    db.transaction((tx) => {
+      tx.executeSql('SELECT * FROM yazi',[], (tx,results) =>{
+        var boyut;
+        var tip;
+
+        boyut = results.rows.item(0).size;
+        tip = results.rows.item(0).tip;
+
+        var date = new Date().getDate();
+        var month = new Date().getMonth() + 1; //Current Month
+        var year = new Date().getFullYear(); //Current Year
+
+
+        this.setState({
+          boyut: boyut,
+          tip:tip,
+
+        })
+        console.log(this.state.data);
+
+      });
+    })
   }
 
 //----------------------------------------------------------------------------------------------------------
@@ -189,40 +222,6 @@ modElement(a){
 
 //----------------------------------------------------------------------------------------------------------
 
-//----------------------------------------------------------------------------------------------------------
-
-    renderEmoji = ({ item }) => {
-
-      return(
-
-        <View style={{margin:10, flexDirection:'row'}}>
-          <TouchableOpacity>
-
-            <View style={{alignItems:'flex-start', justifyContent:'center', flex:1}}>
-              {this.modElement(item.durum)}
-            </View>
-
-
-            <View style={{flex:3}}>
-              <ListItem selected={true}>
-
-                <Left><Text>{item.durum}</Text></Left>
-
-                <Right>
-                  <Image style={{width:60, height:60}} source={require('../emojis/deli.png')}/>
-                </Right>
-
-              </ListItem>
-            </View>
-
-          </TouchableOpacity>
-          </View>
-
-
-      )
-    }
-
-//-----------------------------------------------------------------------------------------------------------
 //style={{margin:10,borderStyle:'solid', borderBottomColor:'black',borderBottomWidth: 2, justifyContent:'center'}}
 //----------------------------------------------------------------------------------------------------------
 
@@ -273,7 +272,7 @@ modElement(a){
                             <View style={{flex:3,flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
 
                               <View style={{flex:2}}>
-                                <Text>{deger}</Text>
+                                <Text style={{fontSize:this.state.boyut, fontFamily:this.state.tip}}>{deger}</Text>
                               </View>
 
                               <View style={{flex:1,alignItems:'center', justifyContent:'center'}}>
@@ -299,7 +298,7 @@ modElement(a){
                             <View style={{flex:3, flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
 
                               <View style={{flex:2}}>
-                                <Text>{deger}</Text>
+                                <Text style={{fontSize:this.state.boyut, fontFamily:this.state.tip}}>{deger}</Text>
                               </View>
 
                               <View style={{flex:1,alignItems:'center', justifyContent:'center'}}>

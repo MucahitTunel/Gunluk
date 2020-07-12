@@ -110,8 +110,8 @@ gonder = (name) => {
   }
   else if (name === "Yazı Boyutu") {
     this.props.navigation.navigate("YaziBoyutu");
-  }else if (name === "Hatırlatmalar") {
-    this.props.navigation.navigate("Hatirlatma");
+  }else if (name === "Renk") {
+    this.props.navigation.navigate("Renk");
   }
 
 }

@@ -1,6 +1,6 @@
 # Gunluk
 
-React-Native ile ilk uğraşmaya başladığım zaman oluşturmaya başladığım uygulamam. Eksiklikleri olan bir uygulama.
+React-Native ile ilk uğraşmaya başladığım zaman oluşturmaya başladığım uygulamam.
 
 ## Uygulama Görüntüleri
 

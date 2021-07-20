@@ -15,7 +15,7 @@
   "dependencies": {
     "native-base": "^2.13.4",
     "react": "16.8.6",
-    "react-native": "0.60.4",
+    "react-native": "0.62.3",
     "react-native-android-speech": "0.0.6",
     "react-native-android-text-to-speech": "^1.2.3",
     "react-native-elements": "^1.2.1",
